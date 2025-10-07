@@ -4,6 +4,20 @@ on:
   push:
 
 jobs:
+  style-check:
+    name: Check code style
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format-14
+
+      - name: Verify code formatting
+        run: |
+          clang-format-14 -style=file --dry-run --Werror $(git ls-files 'src/**/*.h' 'src/**/*.cpp' 'src/**/*.inl')
+
   build-and-test:
     name: Run on ${{ matrix.os }} with SOFA ${{ matrix.sofa_branch }}
     runs-on: ${{ matrix.os }}

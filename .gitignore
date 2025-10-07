@@ -1,1 +1,36 @@
-public
+# Fichiers de build CMake
+build/
+_build/
+CMakeCache.txt
+CMakeLists.txt.user
+CMakeFiles/
+CMakeScripts/
+Testing/
+CTestTestfile.cmake
+cmake_install.cmake
+install_manifest.txt
+
+# Fichiers générés par les IDE
+.vscode/
+.idea/
+*.suo
+*.user
+*.sln
+*.vcxproj
+*.vcxproj.filters
+
+# Fichiers système et temporaires
+.DS_Store
+*.swp
+*~
+
+# Binaires et bibliothèques compilées
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+
+# Dossier 'public' de l'ancien gitignore
+public/
