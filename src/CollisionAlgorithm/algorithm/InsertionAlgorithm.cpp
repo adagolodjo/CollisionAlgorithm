@@ -276,7 +276,10 @@ void InsertionAlgorithm::insertionPhase()
     const type::Vec3 tipToLastCP = lastCP - tipProx->getPosition();
 
     // Only add a new coupling point if the needle tip has advanced far enough
-    if (tipToLastCP.norm() < tipDistThreshold) return;
+    // Use squared norm to avoid expensive sqrt operation
+    const SReal tipToLastCPNormSquared = tipToLastCP.norm2();
+    const SReal tipDistThresholdSquared = tipDistThreshold * tipDistThreshold;
+    if (tipToLastCPNormSquared < tipDistThresholdSquared) return;
     
     // Prepare operations before entering loop
     auto createShaftProximity =
