@@ -36,3 +36,28 @@ If you have an idea for a new feature or an improvement, please open an issue to
 ## Code Style Guide
 
 We use the Google C++ Style Guide with a few modifications, as defined in the `.clang-format` file at the root of the project. Please ensure your IDE is configured to use it, or run the formatting command manually before committing.
+
+### Static Analysis
+
+We use `clang-tidy` for static code analysis to catch bugs and enforce best practices. To run clang-tidy locally:
+
+```bash
+# From the build directory
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+cd ..
+clang-tidy src/CollisionAlgorithm/**/*.cpp -p build
+```
+
+The `.clang-tidy` configuration file at the root of the project defines the checks we enforce. Common issues flagged by clang-tidy include:
+- Potential bugs (null pointer dereferences, use-after-free, etc.)
+- Performance issues (unnecessary copies, inefficient algorithms)
+- Readability concerns (overly complex functions, inconsistent naming)
+- Modern C++ best practices (use of auto, range-based for loops, etc.)
+
+### IDE Integration
+
+**VS Code:** Install the "clangd" extension for automatic formatting and linting.
+
+**CLion:** Enable clang-tidy in Settings → Editor → Inspections → C/C++ → General → Clang-Tidy.
+
+**Vim/Neovim:** Use ALE or coc-clangd for automatic checks.
