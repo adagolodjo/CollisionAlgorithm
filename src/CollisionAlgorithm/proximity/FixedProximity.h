@@ -33,6 +33,8 @@ public:
   virtual void storeLambda(const core::ConstraintParams* , core::MultiVecDerivId , Index , Index , const sofa::linearalgebra::BaseVector* ) const {}
 
   const std::type_info& getTypeInfo() const override { return typeid(FixedProximity); }
+  
+  ProximityType getProximityType() const override { return ProximityType::Fixed; }
 
 	virtual BaseProximity::SPtr copy() override
 	{

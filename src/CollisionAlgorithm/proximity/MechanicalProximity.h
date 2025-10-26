@@ -56,6 +56,8 @@ public:
     }
 
     const std::type_info& getTypeInfo() const override { return typeid(MechanicalProximity<DataTypes>); }
+    
+    ProximityType getProximityType() const override { return ProximityType::Mechanical; }
 
     void buildJacobianConstraint(core::MultiMatrixDerivId cId, const sofa::type::vector<sofa::type::Vec3> & dir, double fact, Index constraintId) const override {
         DataMatrixDeriv & c1_d = *cId[m_geometry->getState()].write();

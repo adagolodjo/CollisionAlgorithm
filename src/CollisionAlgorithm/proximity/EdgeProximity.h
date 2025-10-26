@@ -54,6 +54,8 @@ public:
 	}
 
     const std::type_info& getTypeInfo() const override { return typeid(EdgeProximity); }
+    
+    ProximityType getProximityType() const override { return ProximityType::Edge; }
 
     double f0() const { return m_f0; }
 

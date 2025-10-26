@@ -40,6 +40,8 @@ public:
     }
 
     const std::type_info& getTypeInfo() const override { return typeid(MultiProximity); }
+    
+    ProximityType getProximityType() const override { return ProximityType::Multi; }
 
 	virtual BaseProximity::SPtr copy() override
 	{
