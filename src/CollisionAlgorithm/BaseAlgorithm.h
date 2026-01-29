@@ -1,10 +1,10 @@
 #pragma once
 
-#include <CollisionAlgorithm/config.h>
 #include <CollisionAlgorithm/BaseGeometry.h>
-#include <sofa/core/collision/Pipeline.h>
-#include <CollisionAlgorithm/DataDetectionOutput.h>
 #include <CollisionAlgorithm/CollisionPipeline.h>
+#include <CollisionAlgorithm/DataDetectionOutput.h>
+#include <CollisionAlgorithm/config.h>
+#include <sofa/core/collision/Pipeline.h>
 
 namespace sofa::collisionalgorithm {
 
@@ -13,13 +13,11 @@ namespace sofa::collisionalgorithm {
  * \brief The BaseAlgorithm abstract class defines an interface of
  * algorithms to be wrapped in sofa components
  */
-class SOFA_COLLISIONALGORITHM_API BaseAlgorithm : public CollisionAlgorithm
-{
-public :
-
+class SOFA_COLLISIONALGORITHM_API BaseAlgorithm : public CollisionAlgorithm {
+public:
     SOFA_ABSTRACT_CLASS(BaseAlgorithm, sofa::core::objectmodel::BaseObject);
 
-    typedef std::function<bool(const BaseProximity::SPtr&,const BaseProximity::SPtr&)> FilterFUNC;
+    typedef std::function<bool(const BaseProximity::SPtr&, const BaseProximity::SPtr&)> FilterFUNC;
 
     /*!
      * \brief The BaseFilter class provides an interface to create proximity filter components
@@ -28,13 +26,13 @@ public :
     public:
         SOFA_ABSTRACT_CLASS(BaseFilter, sofa::core::objectmodel::BaseObject);
 
-        core::objectmodel::SingleLink<BaseFilter,BaseAlgorithm,BaseLink::FLAG_STRONGLINK|BaseLink::FLAG_STOREPATH> l_algo;
+        core::objectmodel::SingleLink<BaseFilter, BaseAlgorithm, BaseLink::FLAG_STRONGLINK | BaseLink::FLAG_STOREPATH>
+            l_algo;
 
         /*!
          * \brief BaseAlgorithm Constructor
          */
-        BaseFilter()
-        : l_algo(initLink("algo","list of filters")){
+        BaseFilter() : l_algo(initLink("algo", "list of filters")) {
             l_algo.setPath("@.");
             this->f_listening.setValue(true);
         }
@@ -51,7 +49,7 @@ public :
          * \param p2 : destination proximity
          * \return bool : if the filter accepted the proximities
          */
-        virtual bool accept(const BaseProximity::SPtr & p1,const BaseProximity::SPtr & p2) const = 0;
+        virtual bool accept(const BaseProximity::SPtr& p1, const BaseProximity::SPtr& p2) const = 0;
     };
 
     /*!
@@ -67,9 +65,9 @@ public :
      * \param pdest : destination proximity
      * \return True if all filters accept proximities, otherwise False
      */
-    bool acceptFilter(const BaseProximity::SPtr & p1,const BaseProximity::SPtr & p2) {
-        for (unsigned i=0;i<m_filters.size();i++) {
-            if (! m_filters[i]->accept(p1,p2)) return false;
+    bool acceptFilter(const BaseProximity::SPtr& p1, const BaseProximity::SPtr& p2) {
+        for (unsigned i = 0; i < m_filters.size(); i++) {
+            if (!m_filters[i]->accept(p1, p2)) return false;
         }
         return true;
     }
@@ -79,18 +77,15 @@ public :
     }
 
     FilterFUNC getFilterFunc() {
-        return std::bind(&BaseAlgorithm::acceptFilter,this,std::placeholders::_1,std::placeholders::_2);
+        return std::bind(&BaseAlgorithm::acceptFilter, this, std::placeholders::_1, std::placeholders::_2);
     }
 
-	static FilterFUNC getDefaultFilterFunc()
-	{
-		return [](const BaseProximity::SPtr&,const BaseProximity::SPtr&) { return true; };
-	}
+    static FilterFUNC getDefaultFilterFunc() {
+        return [](const BaseProximity::SPtr&, const BaseProximity::SPtr&) { return true; };
+    }
 
 protected:
-
-
     sofa::type::vector<BaseFilter::SPtr> m_filters;
 };
 
-}
+}  // namespace sofa::collisionalgorithm
