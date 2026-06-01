@@ -12,6 +12,20 @@
 namespace sofa::collisionalgorithm {
 
 /*!
+ * \brief Enumeration for proximity types to enable fast type checking without RTTI
+ */
+enum class ProximityType {
+    Point,
+    Edge,
+    Triangle,
+    Tetrahedron,
+    Fixed,
+    Mechanical,
+    Multi,
+    Unknown
+};
+
+/*!
  * \brief The BaseProximity class is the basic abstract proximity class
  */
 class BaseElement;
@@ -39,6 +53,9 @@ public:
     virtual ~BaseProximity() = default;
 
     virtual const std::type_info& getTypeInfo() const = 0;
+    
+    /// Return the proximity type for fast type checking without RTTI
+    virtual ProximityType getProximityType() const = 0;
 
     template<class PROXIMITY,class... ARGS>
     static inline typename PROXIMITY::SPtr create(ARGS... args) {

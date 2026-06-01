@@ -42,6 +42,8 @@ public:
 	}
 
     const std::type_info& getTypeInfo() const override { return typeid(PointProximity); }
+    
+    ProximityType getProximityType() const override { return ProximityType::Point; }
 
     bool isNormalized() const override { return true; }
 

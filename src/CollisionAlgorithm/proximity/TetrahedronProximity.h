@@ -70,6 +70,8 @@ public:
 	}
 
     const std::type_info& getTypeInfo() const override { return typeid(TetrahedronProximity); }
+    
+    ProximityType getProximityType() const override { return ProximityType::Tetrahedron; }
 
     double f0() { return m_f0; }
 

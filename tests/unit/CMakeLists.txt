@@ -5,3 +5,6 @@
 
 # Add the first example test
 sofa_add_unit_test(FirstAlgorithmTest.cpp)
+
+# Add broad phase test
+sofa_add_unit_test(AABBBroadPhaseTest.cpp)

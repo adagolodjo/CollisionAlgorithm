@@ -34,3 +34,8 @@ install_manifest.txt
 
 # Dossier 'public' de l'ancien gitignore
 public/
+
+# Clang tooling
+compile_commands.json
+.clangd/
+.cache/

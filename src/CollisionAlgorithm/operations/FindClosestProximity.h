@@ -40,135 +40,36 @@ public:
     //        }
 
         std::set<BaseElement::SPtr> selectedElements;
+        
+        // Unified loop that iterates over expanding shells around the center box
+        // This replaces 6 separate loop blocks with a single, clearer implementation
+        int maxDistance = std::max({nbox[0] - cbox[0], cbox[0], 
+                                    nbox[1] - cbox[1], cbox[1],
+                                    nbox[2] - cbox[2], cbox[2]}) + 1;
 
-        for (int d=0; selectedElements.empty();d++) {
-            {
-                int i=-d;
-                if (cbox[0]+i >= 0 && cbox[0]+i <= nbox[0])
-                {
-                    for (int j=-d; j <= d; j++)
-                    {
-                        if (cbox[1]+j < 0 || cbox[1]+j > nbox[1])
+        for (int d = 0; d <= maxDistance && selectedElements.empty(); d++) {
+            // Iterate over the shell at distance d from the center box
+            for (int i = -d; i <= d; i++) {
+                for (int j = -d; j <= d; j++) {
+                    for (int k = -d; k <= d; k++) {
+                        // Only process cells on the boundary of the shell (not interior)
+                        // For d=0, process only the center cell
+                        if (d > 0 && std::abs(i) != d && std::abs(j) != d && std::abs(k) != d)
                             continue;
-
-                        for (int k=-d;k<=d;k++)
-                        {
-                            if (cbox[2]+k < 0 || cbox[2]+k > nbox[2])
-                                continue;
-
-
-                            const std::set<BaseElement::SPtr> & elmts = broadphase->getElementSet(cbox[0] + i,cbox[1] + j,cbox[2] + k);
-                            selectedElements.insert(elmts.cbegin(),elmts.cend());
-                        }
-                    }
-                }
-            }
-
-            //No need to process all the box for d==0 since they all point on the same box
-            if (d==0) continue;
-
-            {
-                int i=d;
-                if (cbox[0]+i >= 0 && cbox[0]+i <= nbox[0])
-                {
-                    for (int j=-d;j<=d;j++)
-                    {
-                        if (cbox[1]+j < 0 || cbox[1]+j > nbox[1])
+                        
+                        int bi = cbox[0] + i;
+                        int bj = cbox[1] + j;
+                        int bk = cbox[2] + k;
+                        
+                        // Check bounds
+                        if (bi < 0 || bi > nbox[0] || 
+                            bj < 0 || bj > nbox[1] || 
+                            bk < 0 || bk > nbox[2])
                             continue;
-
-                        for (int k=-d;k<=d;k++)
-                        {
-                            if (cbox[2]+k < 0 || cbox[2]+k > nbox[2])
-                                continue;
-
-                            const std::set<BaseElement::SPtr> & elmts = broadphase->getElementSet(cbox[0] + i,cbox[1] + j,cbox[2] + k);
-                            selectedElements.insert(elmts.cbegin(),elmts.cend());
-                        }
-                    }
-                }
-            }
-
-
-            {
-                int j=-d;
-                if (cbox[1]+j >= 0 && cbox[1]+j <= nbox[1])
-                {
-                    for (int i=-d+1;i<d;i++)
-                    {
-                        if (cbox[0]+i < 0 || cbox[0]+i > nbox[0])
-                            continue;
-
-                        for (int k=-d;k<=d;k++)
-                        {
-                            if (cbox[2]+k < 0 || cbox[2]+k > nbox[2])
-                                continue;
-
-                            const std::set<BaseElement::SPtr> & elmts = broadphase->getElementSet(cbox[0] + i,cbox[1] + j,cbox[2] + k);
-                            selectedElements.insert(elmts.cbegin(),elmts.cend());
-                        }
-                    }
-                }
-            }
-
-            {
-                int j=d;
-                if (cbox[1]+j >= 0 && cbox[1]+j <= nbox[1])
-                {
-                    for (int i=-d+1;i<d;i++)
-                    {
-                        if (cbox[0]+i < 0 || cbox[0]+i > nbox[0])
-                            continue;
-
-                        for (int k=-d;k<=d;k++)
-                        {
-                            if (cbox[2]+k < 0 || cbox[2]+k > nbox[2])
-                                continue;
-
-                            const std::set<BaseElement::SPtr> & elmts = broadphase->getElementSet(cbox[0] + i,cbox[1] + j,cbox[2] + k);
-                            selectedElements.insert(elmts.cbegin(),elmts.cend());
-                        }
-                    }
-                }
-            }
-
-            {
-                int k=-d;
-                if (cbox[2]+k >= 0 && cbox[2]+k <= nbox[2])
-                {
-                    for (int i=-d+1;i<d;i++)
-                    {
-                        if (cbox[0]+i < 0 || cbox[0]+i > nbox[0])
-                            continue;
-
-                        for (int j=-d+1;j<d;j++)
-                        {
-                            if (cbox[1]+j < 0 || cbox[1]+j > nbox[1])
-                                continue;
-
-                            const std::set<BaseElement::SPtr> & elmts = broadphase->getElementSet(cbox[0] + i,cbox[1] + j,cbox[2] + k);
-                            selectedElements.insert(elmts.cbegin(),elmts.cend());
-                        }
-                    }
-                }
-            }
-
-            {
-                int k=d;
-                if (cbox[2]+k >= 0 && cbox[2]+k <= nbox[2])
-                {
-                    for (int i=-d+1;i<d;i++)
-                    {
-                        if (cbox[0]+i < 0 || cbox[0]+i > nbox[0])
-                            continue;
-
-                        for (int j=-d+1;j<d;j++)
-                        {
-                            if (cbox[1]+j < 0 || cbox[1]+j > nbox[1])
-                                continue;
-
-                            const std::set<BaseElement::SPtr> & elmts = broadphase->getElementSet(cbox[0] + i,cbox[1] + j,cbox[2] + k);
-                            selectedElements.insert(elmts.cbegin(),elmts.cend());
-                        }
+                        
+                        const std::set<BaseElement::SPtr>& elmts = 
+                            broadphase->getElementSet(bi, bj, bk);
+                        selectedElements.insert(elmts.cbegin(), elmts.cend());
                     }
                 }
             }

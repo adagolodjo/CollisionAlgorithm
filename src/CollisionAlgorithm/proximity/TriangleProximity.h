@@ -75,6 +75,8 @@ public:
 	}
 
     const std::type_info& getTypeInfo() const override { return typeid(TriangleProximity); }
+    
+    ProximityType getProximityType() const override { return ProximityType::Triangle; }
 
     bool isNormalized() const override {
 //        if (m_f0+m_f1+m_f2 != 1.0) return false;
