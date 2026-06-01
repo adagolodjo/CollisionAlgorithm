@@ -65,7 +65,7 @@ def createScene(root):
     root.addObject("ConstraintAttachButtonSetting")
     root.addObject("VisualStyle", displayFlags="showVisualModels hideBehaviorModels showCollisionModels hideMappings hideForceFields showWireframe showInteractionForceFields" )
     root.addObject("FreeMotionAnimationLoop")
-    root.addObject("GenericConstraintSolver", tolerance=0.00001, maxIt=5000, regularizationTerm=0.001)
+    root.addObject("BlockGaussSeidelConstraintSolver", tolerance=0.00001, maxIt=5000)#, regularizationTerm=0.001)
     root.addObject("CollisionLoop")
 
     toolController = root.addChild("ToolController")
@@ -157,11 +157,11 @@ def createScene(root):
     FFCollision = FF.addChild("Collision")
     FFCollision.addObject("EdgeSetTopologyContainer", name="Container", src="@../../Needle/bodyCollision/Container_body")
     FFCollision.addObject("MechanicalObject", name="mstate_coli", constraint="@../../Needle/bodyCollision/mstate_body.constraint")
-    FFCollision.addObject("RigidMapping")
+    FFCollision.addObject("RigidMapping", globalToLocalCoords=True)
     FFTip = FF.addChild("Tip")
     FFTip.addObject("PointSetTopologyContainer", name="Container", src="@../../Needle/tipCollision/Container_tip")
     FFTip.addObject("MechanicalObject", name="mstate_coli", constraint="@../../Needle/tipCollision/mstate_tip.constraint")
-    FFTip.addObject("RigidMapping")
+    FFTip.addObject("RigidMapping", globalToLocalCoords=True)
 
     volume = root.addChild("Volume")
     volume.addObject("EulerImplicitSolver")
@@ -212,14 +212,14 @@ def createScene(root):
         surfGeom="@Volume/collision/geom_tri", 
         shaftGeom="@Needle/bodyCollision/geom_body", 
         volGeom="@Volume/geom_tetra", 
-        punctureForceThreshold=1., 
+        punctureForceThreshold=100, 
         tipDistThreshold=0.01,
         drawcollision=True,
         drawPointsScale=0.0001
     )
     root.addObject("DistanceFilter",algo="@InsertionAlgo",distance=0.02)
     root.addObject("SecondDirection",name="punctureDirection",handler="@Volume/collision/SurfaceTriangles")
-    root.addObject("ConstraintUnilateral",input="@InsertionAlgo.collisionOutput",directions="@punctureDirection",draw_scale=0.001, mu=0.001)
+    root.addObject("ConstraintUnilateral",input="@InsertionAlgo.collisionOutput",directions="@punctureDirection", contactDistance=0,draw_scale=0.001, mu=0.001)
 
     root.addObject("FirstDirection",name="bindDirection", handler="@Needle/bodyCollision/NeedleBeams")
     root.addObject("ConstraintInsertion",input="@InsertionAlgo.insertionOutput", directions="@bindDirection",draw_scale="0.01", frictionCoeff=0.000)
