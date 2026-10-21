@@ -39,3 +39,6 @@ public/
 compile_commands.json
 .clangd/
 .cache/
+
+# ignore cached bytecode-compiled python scene files
+*__pycache__/
