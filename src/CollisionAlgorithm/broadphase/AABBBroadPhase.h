@@ -91,6 +91,10 @@ public:
      * @param elmt A smart pointer to the element to be added.
      */
     void addElement(int i, int j, int k, BaseElement::SPtr elmt) override {
+        if (i < 0 || j < 0 || k < 0 ||
+            i >= m_nbox[0] || j >= m_nbox[1] || k >= m_nbox[2])
+            return;
+
         m_offset[0] = m_nbox[1] * m_nbox[2];
         m_offset[1] = m_nbox[2];
 

@@ -21,6 +21,8 @@ public:
     static ElementIterator::SPtr broadPhaseIterator(BaseProximity::SPtr prox, BaseGeometry::BroadPhase * broadphase) {
         //old params : type::Vec3i cbox, std::set<BaseProximity::Index> & selectElements, int d
         type::Vec3i nbox = broadphase->getNbox();
+        if (nbox[0] <= 0 || nbox[1] <= 0 || nbox[2] <= 0)
+            return ElementIterator::empty();
 
         //take the first broad phase...
         type::Vec3 P = prox->getPosition();
@@ -29,9 +31,9 @@ public:
 
         //project the box in the bounding box of the object
         //search with the closest box in bbox
-        cbox[0] = std::max(0,std::min(nbox[0],cbox[0]));
-        cbox[1] = std::max(0,std::min(nbox[1],cbox[1]));
-        cbox[2] = std::max(0,std::min(nbox[2],cbox[2]));
+        cbox[0] = std::max(0,std::min(nbox[0]-1,cbox[0]));
+        cbox[1] = std::max(0,std::min(nbox[1]-1,cbox[1]));
+        cbox[2] = std::max(0,std::min(nbox[2]-1,cbox[2]));
 
     //        int max = 0;
     //        for (int i = 0 ; i < 3 ; i++) {
@@ -43,9 +45,9 @@ public:
         
         // Unified loop that iterates over expanding shells around the center box
         // This replaces 6 separate loop blocks with a single, clearer implementation
-        int maxDistance = std::max({nbox[0] - cbox[0], cbox[0], 
-                                    nbox[1] - cbox[1], cbox[1],
-                                    nbox[2] - cbox[2], cbox[2]}) + 1;
+        int maxDistance = std::max({nbox[0] - 1 - cbox[0], cbox[0],
+                                    nbox[1] - 1 - cbox[1], cbox[1],
+                                    nbox[2] - 1 - cbox[2], cbox[2]}) + 1;
 
         for (int d = 0; d <= maxDistance && selectedElements.empty(); d++) {
             // Iterate over the shell at distance d from the center box
@@ -62,9 +64,9 @@ public:
                         int bk = cbox[2] + k;
                         
                         // Check bounds
-                        if (bi < 0 || bi > nbox[0] || 
-                            bj < 0 || bj > nbox[1] || 
-                            bk < 0 || bk > nbox[2])
+                        if (bi < 0 || bi >= nbox[0] ||
+                            bj < 0 || bj >= nbox[1] ||
+                            bk < 0 || bk >= nbox[2])
                             continue;
                         
                         const std::set<BaseElement::SPtr>& elmts = 

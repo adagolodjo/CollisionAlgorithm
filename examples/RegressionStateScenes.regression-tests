@@ -12,7 +12,7 @@
 #     directly in the repo Regression
 
 ### References relative path ###
-../regression/references
+../tests/regression/references
 
 ### Regression Scenes ###
 NeedleInsertion.py 700 1e-7 1 1

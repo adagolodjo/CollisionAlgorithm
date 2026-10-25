@@ -25,7 +25,8 @@ Operations::Project::Result EdgeToolBox::project(const type::Vec3 & P, const Edg
 
 void EdgeToolBox::projectOnEdge(const type::Vec3d & projP, const type::Vec3d & e1, const type::Vec3d & e2, double & fact_u, double & fact_v) {
     type::Vec3d v = e2 - e1;
-    fact_v = dot(projP - e1,v) / dot(v,v);
+    const double denom = dot(v,v);
+    fact_v = (denom != 0.0) ? dot(projP - e1,v) / denom : 0.0;
     fact_u = 1.0-fact_v;
 }
 

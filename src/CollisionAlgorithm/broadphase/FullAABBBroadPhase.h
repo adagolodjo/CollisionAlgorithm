@@ -18,12 +18,13 @@ public:
     void updateData() override {}
 
     const std::set<BaseElement::SPtr> & getElementSet(unsigned i, unsigned j, unsigned k) const override {
-        if (m_indexedElement[i][j][k].size() == 0) {
-            static std::set<BaseElement::SPtr> empty;
+        static std::set<BaseElement::SPtr> empty;
+        if (i >= static_cast<unsigned>(m_nbox[0]) ||
+            j >= static_cast<unsigned>(m_nbox[1]) ||
+            k >= static_cast<unsigned>(m_nbox[2]))
             return empty;
-        } else {
-            return m_indexedElement[i][j][k];
-        }
+
+        return m_indexedElement[i][j][k];
     }
 
     void newContainer() override {
@@ -40,6 +41,10 @@ public:
     }
 
     void addElement(int i, int j, int k, BaseElement::SPtr elmt) override {
+        if (i < 0 || j < 0 || k < 0 ||
+            i >= m_nbox[0] || j >= m_nbox[1] || k >= m_nbox[2])
+            return;
+
         m_indexedElement[i][j][k].insert(elmt);
     }
 

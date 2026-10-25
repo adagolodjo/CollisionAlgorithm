@@ -25,7 +25,11 @@ public:
     : d_nbox(initData(&d_nbox, type::Vec3i(8,8,8),"nbox", "number of bbox"))
     , d_static(initData(&d_static, false,"isStatic", "Optimization: object is not moving in the scene"))
     , d_method(initData(&d_method, 0,"method", "chosen method to determine the boxes containing the elements"))
-    , d_thread(initData(&d_thread, 8,"thread","Number of threads")){
+    , d_thread(initData(&d_thread, 8,"thread","Number of threads"))
+    , m_Bmin(0,0,0)
+    , m_Bmax(0,0,0)
+    , m_cellSize(0,0,0)
+    , m_nbox(0,0,0) {
         //c_nbox.addInputs({&d_nbox});
         //c_nbox.addCallback(std::bind(&BaseAABBBroadPhase::updateBroadPhase,this));
     }
@@ -62,6 +66,18 @@ public:
 
     inline void doUpdate() {
         sofa::helper::AdvancedTimer::stepBegin("AABBBroadPhase::doUpdate - "+this->getName());
+        if (l_geometry == NULL || l_geometry->getSize() == 0)
+        {
+            m_Bmin = type::Vec3(0,0,0);
+            m_Bmax = type::Vec3(0,0,0);
+            m_cellSize = type::Vec3(0,0,0);
+            m_nbox = type::Vec3i(0,0,0);
+            newContainer();
+            updateData();
+            sofa::helper::AdvancedTimer::stepEnd("AABBBroadPhase::doUpdate - "+this->getName());
+            return;
+        }
+
         m_Bmin = l_geometry->getPosition(0);
         m_Bmax = m_Bmin;
 
@@ -81,8 +97,10 @@ public:
         sofa::helper::AdvancedTimer::stepEnd("AABBBroadPhase BBox area update - "+this->getName());
 
         //fixes cell size
+        type::Vec3i nbox = d_nbox.getValue();
         for (int i = 0 ; i < 3 ; i++) {
-            m_cellSize[i] = (m_Bmax[i] - m_Bmin[i]) / d_nbox.getValue()[i];
+            nbox[i] = std::max(1, nbox[i]);
+            m_cellSize[i] = (m_Bmax[i] - m_Bmin[i]) / nbox[i];
         }
 
 
@@ -94,7 +112,7 @@ public:
                 m_cellSize[i] = (m_cellSize[a]+m_cellSize[b])*0.5;
                 m_nbox[i] = 1;
             } else {
-                m_nbox[i] = d_nbox.getValue()[i] + 1;
+                m_nbox[i] = nbox[i] + 1;
             }
         }
 
@@ -134,13 +152,16 @@ public:
 
     //compute the box where is P
     type::Vec3i getBoxCoord(const type::Vec3 & P) const override {
-        return type::Vec3i((P[0] - m_Bmin[0])/m_cellSize[0],
-                           (P[1] - m_Bmin[1])/m_cellSize[1],
-                           (P[2] - m_Bmin[2])/m_cellSize[2]);
+        type::Vec3i coord(0,0,0);
+        for (int i = 0 ; i < 3 ; i++) {
+            if (m_cellSize[i] != 0)
+                coord[i] = static_cast<int>((P[i] - m_Bmin[i])/m_cellSize[i]);
+        }
+        return coord;
     }
 
     type::Vec3i getNbox() override {
-        return d_nbox.getValue();
+        return m_nbox;
     }
 
 
@@ -153,11 +174,8 @@ public:
         {
             BaseElement::SPtr elmt = it->element();
 
-            type::BoundingBox bbox;
-
-            for (auto it = elmt->pointElements().cbegin(); it!= elmt->pointElements().cend(); it++) {
-                bbox.include((*it)->getP0()->getPosition());
-            }
+            const type::BoundingBox bbox = elmt->getBoundingBox();
+            if (!bbox.isValid()) continue;
 
             const type::Vec3 & minbox = bbox.minBBox();
             const type::Vec3 & maxbox = bbox.maxBBox();
@@ -168,6 +186,7 @@ public:
             for (int i = 0 ; i < 3 ; i++) {
                 cmaxbox[i] = ceil((maxbox[i] - m_Bmin[i])/m_cellSize[i]);
                 cminbox[i] = floor((minbox[i] - m_Bmin[i])/m_cellSize[i]); //second m_Bmax was Bmin => bug ?
+                if (cmaxbox[i] <= cminbox[i]) cmaxbox[i] = cminbox[i]+1;
             }
 
             for (int i=cminbox[0];i<cmaxbox[0];i++)
@@ -213,6 +232,17 @@ public:
                 boxKey.insert(boxCoord);
             }
 
+            // Elements that do not expose their vertices through pointElements()
+            // (e.g. PointElement) are indexed using their own bounding box.
+            if (boxKey.empty()) {
+                const type::BoundingBox bbox = elmt->getBoundingBox();
+                if (!bbox.isValid()) continue;
+
+                type::Vec3i key = getBoxCoord(bbox.minBBox());
+                addElement(key[0], key[1], key[2], elmt);
+                continue;
+            }
+
             // If all the points of the element are located in the same cell
             if (boxKey.size() == 1) {
                 type::Vec3i key = *boxKey.begin();
@@ -235,11 +265,8 @@ public:
     // /// Based on Akenine-Möller, T. (2001). "Fast 3D Triangle-Box Overlap Testing".
     // /// and      https://gist.github.com/yomotsu/d845f21e2e1eb49f647f
     void multipleCells(BaseElement::SPtr elmt, std::set<type::Vec3i> & boxKey) {
-        type::BoundingBox bbox;
-
-        for (auto it = elmt->pointElements().cbegin(); it!= elmt->pointElements().cend(); it++) {
-            bbox.include((*it)->getP0()->getPosition());
-        }
+        const type::BoundingBox bbox = elmt->getBoundingBox();
+        if (!bbox.isValid()) return;
 
         const type::Vec3 & minbox = bbox.minBBox();
         const type::Vec3 & maxbox = bbox.maxBBox();
@@ -250,6 +277,7 @@ public:
         for (int i = 0 ; i < 3 ; i++) {
             cmaxbox[i] = ceil((maxbox[i] - m_Bmin[i])/m_cellSize[i]);
             cminbox[i] = floor((minbox[i] - m_Bmin[i])/m_cellSize[i]); //second m_Bmax was Bmin => bug ?
+            if (cmaxbox[i] <= cminbox[i]) cmaxbox[i] = cminbox[i]+1;
         }
 
 
@@ -397,12 +425,15 @@ public:
 
                 sofa::helper::AdvancedTimer::stepBegin("========================= BBox =========================");
                 BaseElement::SPtr elmt = it->element();
-                type::BoundingBox bbox;
-
-                for (auto it_p = elmt->pointElements().cbegin(); it_p!= elmt->pointElements().cend(); it_p++) {
-                    bbox.include((*it_p)->getP0()->getPosition());
-                }
+                const type::BoundingBox bbox = elmt->getBoundingBox();
                 sofa::helper::AdvancedTimer::stepEnd("========================= BBox =========================");
+
+                if (!bbox.isValid())
+                {
+                    it++;
+                    start++;
+                    continue;
+                }
 
                 sofa::helper::AdvancedTimer::stepBegin("========================= insert elem =========================");
 
@@ -415,6 +446,7 @@ public:
                 for (int i = 0 ; i < 3 ; i++) {
                     cmaxbox[i] = ceil((maxbox[i] - m_Bmin[i])/m_cellSize[i]);
                     cminbox[i] = floor((minbox[i] - m_Bmin[i])/m_cellSize[i]); //second m_Bmax was Bmin => bug ?
+                    if (cmaxbox[i] <= cminbox[i]) cmaxbox[i] = cminbox[i]+1;
                 }
 
                 for (int i=cminbox[0];i<cmaxbox[0];i++)
@@ -446,19 +478,23 @@ public:
         else if (l_geometry->edgeElements().size()) size = l_geometry->edgeElements().size();
         else size = l_geometry->pointElements().size();
 
-        int NBTHREAD = d_thread.getValue();
-        int NBLOCS=(size+NBTHREAD-1)/NBTHREAD;
-        int start = 0;
+        if (size == 0)
+        {
+            m_data.clear();
+            return;
+        }
+
+        const int NBTHREAD = std::max(1, std::min(d_thread.getValue(), size));
+        const int NBLOCS = (size + NBTHREAD - 1) / NBTHREAD;
         std::vector<std::thread> threads(NBTHREAD);
 
         m_data.clear();
         m_data.resize(NBTHREAD);
 
         for (int t=0;t<NBTHREAD;t++) {
-            int end = std::min(start+NBLOCS,size-1);
+            const int start = std::min(t * NBLOCS, size);
+            const int end = std::min(start + NBLOCS, size);
             threads[t]=std::thread(thread_worker, start, end, t);
-//            thread_worker(start,end,m_data[t]);
-            start=end;
         }
         for (int t=0;t<NBTHREAD;t++) threads[t].join();
 

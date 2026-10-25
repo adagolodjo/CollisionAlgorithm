@@ -43,6 +43,10 @@ sofa_create_package_with_targets(
 
 enable_testing()
 
-if(SOFA_BUILD_TESTS)
+# If SOFA_BUILD_TESTS exists and is OFF, then the plugin tests are auto-disabled.
+# Otherwise (standalone build), the tests are built by default.
+cmake_dependent_option(COLLISIONALGORITHM_BUILD_TESTS "Compile the automatic tests" ON
+    "SOFA_BUILD_TESTS OR NOT DEFINED SOFA_BUILD_TESTS" OFF)
+if(COLLISIONALGORITHM_BUILD_TESTS)
     add_subdirectory(tests/unit)
 endif()

@@ -30,20 +30,35 @@ public:
             v0 = P1 - P0;
             v1 = P2 - P0;
             N=cross(v1,v0);
-            area = N.norm()/2;
-            N.normalize();
+
+            const double nNorm = N.norm();
+            area = nNorm/2;
+            if (nNorm != 0.0)
+                N /= nNorm;
+            else
+                N = type::Vec3d(0,0,0);
 
             d00 = dot(v0,v0);
             d01 = dot(v0,v1);
             d11 = dot(v1,v1);
 
-            invDenom = 1.0 / (d00 * d11 - d01 * d01);
+            const double denom = d00 * d11 - d01 * d01;
+            invDenom = (denom != 0.0) ? 1.0 / denom : 0.0;
 
             ax1 = v0;
             ax2 = v0.cross(N);
 
-            ax1.normalize();
-            ax2.normalize();
+            const double ax1Norm = ax1.norm();
+            if (ax1Norm != 0.0)
+                ax1 /= ax1Norm;
+            else
+                ax1 = type::Vec3d(0,0,0);
+
+            const double ax2Norm = ax2.norm();
+            if (ax2Norm != 0.0)
+                ax2 /= ax2Norm;
+            else
+                ax2 = type::Vec3d(0,0,0);
         }
     };
 

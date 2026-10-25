@@ -159,6 +159,7 @@ InsertionAlgorithm::AlgorithmOutput InsertionAlgorithm::puncturePhase()
     auto createTipProximity =
         Operations::CreateCenterProximity::Operation::get(l_tipGeom->getTypeInfo());
     auto projectOnTip = Operations::Project::Operation::get(l_tipGeom);
+    const FilterFUNC filter = getFilterFunc();
 
     const SReal punctureForceThreshold = d_punctureForceThreshold.getValue();
     for (auto itTip = l_tipGeom->begin(); itTip != l_tipGeom->end(); itTip++)
@@ -168,7 +169,7 @@ InsertionAlgorithm::AlgorithmOutput InsertionAlgorithm::puncturePhase()
         if (!tipProx) continue;
 
         const BaseProximity::SPtr surfProx =
-            findClosestProxOnSurf(tipProx, l_surfGeom.get(), projectOnSurf, getFilterFunc());
+            findClosestProxOnSurf(tipProx, l_surfGeom.get(), projectOnSurf, filter);
         if (surfProx)
         {
             surfProx->normalize();
@@ -178,22 +179,26 @@ InsertionAlgorithm::AlgorithmOutput InsertionAlgorithm::puncturePhase()
             {
                 const MechStateTipType::SPtr mstate =
                     l_tipGeom->getContext()->get<MechStateTipType>();
-                const auto& lambda =
-                    m_constraintSolver->getLambda()[mstate.get()].read()->getValue();
                 const auto dt = l_tipGeom->getContext()->getDt();
-                SReal norm{0_sreal};
 
-                for (const auto& l : lambda)
+                if (mstate && dt > 0)
                 {
-                    norm += l.norm();
-                }
-                // Convert impulse to force
-                norm /= dt;
+                    const auto& lambda =
+                        m_constraintSolver->getLambda()[mstate.get()].read()->getValue();
+                    SReal norm{0_sreal};
 
-                if (norm > punctureForceThreshold)
-                {
-                    m_couplingPts.push_back(surfProx);
-                    continue;
+                    for (const auto& l : lambda)
+                    {
+                        norm += l.norm();
+                    }
+                    // Convert impulse to force
+                    norm /= dt;
+
+                    if (norm > punctureForceThreshold)
+                    {
+                        m_couplingPts.push_back(surfProx);
+                        continue;
+                    }
                 }
             }
 
@@ -216,6 +221,7 @@ InsertionAlgorithm::AlgorithmOutput InsertionAlgorithm::shaftCollisionPhase()
     auto createShaftProximity =
         Operations::CreateCenterProximity::Operation::get(l_shaftGeom->getTypeInfo());
     auto projectOnShaft = Operations::Project::Operation::get(l_shaftGeom);
+    const FilterFUNC filter = getFilterFunc();
 
     for (auto itShaft = l_shaftGeom->begin(); itShaft != l_shaftGeom->end(); itShaft++)
     {
@@ -224,7 +230,7 @@ InsertionAlgorithm::AlgorithmOutput InsertionAlgorithm::shaftCollisionPhase()
         if (!shaftProx) continue;
 
         const BaseProximity::SPtr surfProx =
-            findClosestProxOnSurf(shaftProx, l_surfGeom.get(), projectOnSurf, getFilterFunc());
+            findClosestProxOnSurf(shaftProx, l_surfGeom.get(), projectOnSurf, filter);
 
         if (surfProx)
         {
@@ -241,7 +247,7 @@ InsertionAlgorithm::AlgorithmOutput InsertionAlgorithm::shaftCollisionPhase()
                 auto findClosestProxOnShaft =
                     Operations::FindClosestProximity::Operation::get(l_shaftGeom);
                 shaftProx =
-                    findClosestProxOnShaft(surfProx, l_shaftGeom, projectOnShaft, getFilterFunc());
+                    findClosestProxOnShaft(surfProx, l_shaftGeom, projectOnShaft, filter);
 
                 if (!shaftProx) continue;
 
@@ -256,8 +262,11 @@ InsertionAlgorithm::AlgorithmOutput InsertionAlgorithm::shaftCollisionPhase()
 void InsertionAlgorithm::insertionPhase()
 {
     if (!l_tipGeom || !l_volGeom || !l_shaftGeom) return;
+    if (l_tipGeom->getSize() == 0 || l_shaftGeom->getSize() < 2) return;
 
     ElementIterator::SPtr itTip = l_tipGeom->begin();
+    if (itTip->end()) return;
+
     auto createTipProximity =
         Operations::CreateCenterProximity::Operation::get(itTip->getTypeInfo());
     const BaseProximity::SPtr tipProx = createTipProximity(itTip->element());
@@ -266,14 +275,18 @@ void InsertionAlgorithm::insertionPhase()
 
     // Remove coupling points that are ahead of the tip in the insertion direction
     ElementIterator::SPtr itShaft = l_shaftGeom->begin(l_shaftGeom->getSize() - 2);
-    auto prunePointsAheadOfTip =
-        Operations::Needle::PrunePointsAheadOfTip::get(itShaft->getTypeInfo());
-    prunePointsAheadOfTip(m_couplingPts, itShaft->element());
+    if (!itShaft->end())
+    {
+        auto prunePointsAheadOfTip =
+            Operations::Needle::PrunePointsAheadOfTip::get(itShaft->getTypeInfo());
+        prunePointsAheadOfTip(m_couplingPts, itShaft->element());
+    }
 
     if (m_couplingPts.empty()) return;
 
     type::Vec3 lastCP = m_couplingPts.back()->getPosition();
     const SReal tipDistThreshold = this->d_tipDistThreshold.getValue();
+    if (tipDistThreshold <= 0_sreal) return;
 
     // Vector from tip to last coupling point; used for distance and directional checks
     const type::Vec3 tipToLastCP = lastCP - tipProx->getPosition();
@@ -291,6 +304,7 @@ void InsertionAlgorithm::insertionPhase()
     auto findClosestProxOnVol = Operations::FindClosestProximity::Operation::get(l_volGeom);
     auto projectOnVol = Operations::Project::Operation::get(l_volGeom);
     auto containsPointInVol = Operations::ContainsPointInProximity::Operation::get(l_volGeom);
+    const FilterFUNC filter = getFilterFunc();
 
     // Cache shaft segment properties to avoid repeated lookups and normalizations
     struct ShaftSegment {
@@ -320,6 +334,7 @@ void InsertionAlgorithm::insertionPhase()
         seg.p1 = edgeProx->element()->getP1()->getPosition();
         seg.direction = (seg.p1 - seg.p0);
         seg.length = seg.direction.norm();
+        if (seg.length <= 0_sreal) continue;
         seg.direction /= seg.length;  // normalize
         
         shaftSegments.push_back(seg);
@@ -335,10 +350,12 @@ void InsertionAlgorithm::insertionPhase()
 
         const int numCPs = floor(lastCPToP1.norm() / tipDistThreshold);
 
+        type::Vec3 nextCP = lastCP;
         for (int idCP = 0; idCP < numCPs; idCP++)
         {
             // Candidate coupling point along shaft segment
-            const type::Vec3 candidateCP = lastCP + tipDistThreshold * seg.direction;
+            nextCP += tipDistThreshold * seg.direction;
+            const type::Vec3 candidateCP = nextCP;
 
             // Project candidate CP onto the edge element and compute scalar coordinate
             // along segment (using cached length)
@@ -355,7 +372,7 @@ void InsertionAlgorithm::insertionPhase()
 
             // ... then find nearest volume proximity
             const BaseProximity::SPtr volProx =
-                findClosestProxOnVol(shaftProx, l_volGeom.get(), projectOnVol, getFilterFunc());
+                findClosestProxOnVol(shaftProx, l_volGeom.get(), projectOnVol, filter);
 
             if (!volProx) continue;
 
@@ -367,6 +384,7 @@ void InsertionAlgorithm::insertionPhase()
                 volProx->normalize();
                 m_couplingPts.push_back(volProx);
                 lastCP = volProx->getPosition();
+                nextCP = lastCP;
             }
         }
     }
@@ -381,11 +399,12 @@ InsertionAlgorithm::AlgorithmOutput InsertionAlgorithm::reprojectCouplingPoints(
     // Reprojection on shaft geometry sequence
     auto findClosestProxOnShaft = Operations::FindClosestProximity::Operation::get(l_shaftGeom);
     auto projectOnShaft = Operations::Project::Operation::get(l_shaftGeom);
+    const FilterFUNC filter = getFilterFunc();
 
     for (const auto& cp : m_couplingPts)
     {
         const BaseProximity::SPtr shaftProx =
-            findClosestProxOnShaft(cp, l_shaftGeom.get(), projectOnShaft, getFilterFunc());
+            findClosestProxOnShaft(cp, l_shaftGeom.get(), projectOnShaft, filter);
 
         if (!shaftProx) continue;
 

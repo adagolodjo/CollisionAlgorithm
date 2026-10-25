@@ -82,8 +82,11 @@ public:
     double f3() { return m_f3; }
 
     double * getBaryCoord() override {
-        static double baryCoord[4] = {m_f0,m_f1,m_f2,m_f3};
-        return baryCoord;
+        m_baryCoord[0] = m_f0;
+        m_baryCoord[1] = m_f1;
+        m_baryCoord[2] = m_f2;
+        m_baryCoord[3] = m_f3;
+        return m_baryCoord;
     }
 
     bool isNormalized() const override {
@@ -106,6 +109,7 @@ public:
 protected:
     TetrahedronElement::SPtr m_elmt;
     double m_f0,m_f1,m_f2,m_f3;
+    double m_baryCoord[4];
 };
 
 }

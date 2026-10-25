@@ -111,8 +111,9 @@ public:
         output.clear();
 
         auto itfrom = l_from->pointBegin();
+        if (itfrom->end()) return;
 
-        auto createProximityOp = Operations::CreateCenterProximity::Operation::get(l_from->begin()->getTypeInfo());
+        auto createProximityOp = Operations::CreateCenterProximity::Operation::get(itfrom->getTypeInfo());
 //        auto findClosestProxOp = Operations::FindClosestProximity::Operation::get(l_dest);
 //        auto projectOp = Operations::Project::Operation::get(l_dest);
 

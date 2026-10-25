@@ -51,9 +51,9 @@ TetrahedronElement::SPtr TetrahedronElement::create(BaseProximity::SPtr prox0, B
     EdgeElement::SPtr e5 = EdgeElement::create(p3,p2);
 
     TriangleElement::SPtr t0 = TriangleElement::create(p0,p1,p2,e0,e1,e2);
-    TriangleElement::SPtr t1 = TriangleElement::create(p0,p1,p2,e0,e4,e3);
-    TriangleElement::SPtr t2 = TriangleElement::create(p0,p1,p2,e4,e1,e5);
-    TriangleElement::SPtr t3 = TriangleElement::create(p0,p1,p2,e3,e2,e5);
+    TriangleElement::SPtr t1 = TriangleElement::create(p0,p1,p3,e0,e4,e3);
+    TriangleElement::SPtr t2 = TriangleElement::create(p1,p2,p3,e1,e5,e4);
+    TriangleElement::SPtr t3 = TriangleElement::create(p0,p2,p3,e2,e5,e3);
 
     return TetrahedronElement::create(p0,p1,p2,p3,
                                       e0,e1,e2,e3,e4,e5,

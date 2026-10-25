@@ -36,6 +36,15 @@ void TetrahedronToolBox::projectOnTetra(const type::Vec3d projectP, const Tetrah
 void TetrahedronToolBox::computeTetraBaryCoords(const type::Vec3d & P, const TetrahedronElement::TetraInfo & tinfo, double & fact_u,double & fact_v, double & fact_w, double & fact_x) {
     type::Vec3d e = P - tinfo.P0;
 
+    if (tinfo.V0 == 0.0)
+    {
+        fact_v = 0.0;
+        fact_w = 0.0;
+        fact_x = 0.0;
+        fact_u = 1.0;
+        return;
+    }
+
     double Va = 1.0/6.0 * dot(e,tinfo.ax2Cax3);
     double Vb = 1.0/6.0 * dot(tinfo.ax1,e.cross(tinfo.ax3));
     double Vc = 1.0/6.0 * dot(tinfo.ax1,tinfo.ax2.cross(e));

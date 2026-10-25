@@ -62,8 +62,9 @@ public:
     double f1() const { return m_f1; }
 
     double * getBaryCoord() override {
-        static double baryCoord[2] = {m_f0,m_f1};
-        return baryCoord;
+        m_baryCoord[0] = m_f0;
+        m_baryCoord[1] = m_f1;
+        return m_baryCoord;
     }
 
     bool isNormalized() const override {
@@ -83,6 +84,7 @@ public:
 protected:
     EdgeElement::SPtr m_elmt;
     double m_f0,m_f1;
+    double m_baryCoord[2];
 };
 
 }

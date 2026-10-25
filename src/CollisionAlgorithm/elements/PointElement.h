@@ -16,6 +16,13 @@ public:
 
     inline BaseProximity::SPtr getP0() const { return m_prox; }
 
+    type::BoundingBox getBoundingBox() const override {
+        type::BoundingBox bbox;
+        if (m_prox != nullptr)
+            bbox.include(m_prox->getPosition());
+        return bbox;
+    }
+
     void update() override {}
 
     void draw(const core::visual::VisualParams * /*vparams*/) override {

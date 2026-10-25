@@ -78,7 +78,8 @@ public:
         const double f = lambda->element(cid_global+cid_local);
         for (auto colIt = rowIt.begin(), colItEnd = rowIt.end(); colIt != colItEnd; ++colIt)
         {
-            res[colIt.index()] += colIt.val() * f;
+            if (colIt.index() == m_pid)
+                res[m_pid] += colIt.val() * f;
         }
     }
 

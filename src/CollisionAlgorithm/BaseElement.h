@@ -3,6 +3,7 @@
 #include <CollisionAlgorithm/config.h>
 #include <CollisionAlgorithm/BaseProximity.h>
 #include <sofa/core/visual/VisualParams.h>
+#include <sofa/type/BoundingBox.h>
 
 namespace sofa::collisionalgorithm {
 
@@ -59,6 +60,16 @@ public:
 
     virtual const ElementContainer<TetrahedronElement> & tetrahedronElements() const = 0;//{ return m_tetrahedronElements; }
 
+    /**
+     * @brief Computes the bounding box of the element.
+     *
+     * The default implementation is based on the element's vertices, which are
+     * exposed through pointElements() for edges, triangles and tetrahedra.
+     * Element types that do not expose their vertices this way (e.g. PointElement)
+     * have to override it.
+     */
+    virtual type::BoundingBox getBoundingBox() const;
+
     virtual void draw(const core::visual::VisualParams * vparams) = 0;
 
     virtual const std::type_info& getTypeInfo() const = 0;
@@ -69,10 +80,10 @@ public:
 
     void setDirty(bool b) {m_isDirty = b;}
 
-    bool isDirty() {return m_isDirty;}
+    bool isDirty() const {return m_isDirty;}
 
 protected:
-    bool m_isDirty;
+    bool m_isDirty = true;
 
 };
 
