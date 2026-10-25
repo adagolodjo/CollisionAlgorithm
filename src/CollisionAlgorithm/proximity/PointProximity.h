@@ -7,14 +7,14 @@ namespace sofa::collisionalgorithm {
 
 class PointProximity : public BaseProximity {
 public:
-
     typedef std::shared_ptr<PointProximity> SPtr;
 
-    PointProximity(PointElement::SPtr elmt)
-    : m_elmt(elmt) {}
+    PointProximity(PointElement::SPtr elmt) : m_elmt(elmt) {
+    }
 
-    void buildJacobianConstraint(core::MultiMatrixDerivId cId, const sofa::type::vector<sofa::type::Vec3> & dir, double fact, Index constraintId) const override {
-        m_elmt->getP0()->buildJacobianConstraint(cId,dir,fact,constraintId);
+    void buildJacobianConstraint(core::MultiMatrixDerivId cId, const sofa::type::vector<sofa::type::Vec3>& dir,
+                                 double fact, Index constraintId) const override {
+        m_elmt->getP0()->buildJacobianConstraint(cId, dir, fact, constraintId);
     }
 
     /// return proximiy position in a Vec3
@@ -26,30 +26,39 @@ public:
         return m_elmt->getP0()->getVelocity(v);
     }
 
-    void storeLambda(const core::ConstraintParams* cParams, core::MultiVecDerivId res, Index cid_global, Index cid_local, const sofa::linearalgebra::BaseVector* lambda) const override {
-        m_elmt->getP0()->storeLambda(cParams,res,cid_global,cid_local,lambda);
+    void storeLambda(const core::ConstraintParams* cParams, core::MultiVecDerivId res, Index cid_global,
+                     Index cid_local, const sofa::linearalgebra::BaseVector* lambda) const override {
+        m_elmt->getP0()->storeLambda(cParams, res, cid_global, cid_local, lambda);
     }
 
-    PointElement::SPtr element() { return m_elmt; }
+    PointElement::SPtr element() {
+        return m_elmt;
+    }
 
-    static BaseProximity::SPtr create(const PointElement::SPtr & p) {
+    static BaseProximity::SPtr create(const PointElement::SPtr& p) {
         return p->getP0();
     }
 
-	virtual BaseProximity::SPtr copy() override
-	{
-		return PointProximity::create(m_elmt);
-	}
+    virtual BaseProximity::SPtr copy() override {
+        return PointProximity::create(m_elmt);
+    }
 
-    const std::type_info& getTypeInfo() const override { return typeid(PointProximity); }
-    
-    ProximityType getProximityType() const override { return ProximityType::Point; }
+    const std::type_info& getTypeInfo() const override {
+        return typeid(PointProximity);
+    }
 
-    bool isNormalized() const override { return true; }
+    ProximityType getProximityType() const override {
+        return ProximityType::Point;
+    }
 
-    void normalize() override {}
+    bool isNormalized() const override {
+        return true;
+    }
 
-    double * getBaryCoord() override {
+    void normalize() override {
+    }
+
+    double* getBaryCoord() override {
         return nullptr;
     }
 
@@ -57,5 +66,4 @@ protected:
     PointElement::SPtr m_elmt;
 };
 
-}
-
+}  // namespace sofa::collisionalgorithm

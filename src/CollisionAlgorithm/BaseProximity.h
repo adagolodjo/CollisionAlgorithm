@@ -1,12 +1,12 @@
 #pragma once
 
 #include <CollisionAlgorithm/config.h>
-#include <sofa/core/VecId.h>
-#include <sofa/core/MultiVecId.h>
-#include <sofa/linearalgebra/BaseVector.h>
 #include <sofa/core/ConstraintParams.h>
+#include <sofa/core/MultiVecId.h>
+#include <sofa/core/VecId.h>
 #include <sofa/core/behavior/MechanicalState.h>
 #include <sofa/core/topology/Topology.h>
+#include <sofa/linearalgebra/BaseVector.h>
 #include <sofa/type/Vec.h>
 
 namespace sofa::collisionalgorithm {
@@ -14,23 +14,14 @@ namespace sofa::collisionalgorithm {
 /*!
  * \brief Enumeration for proximity types to enable fast type checking without RTTI
  */
-enum class ProximityType {
-    Point,
-    Edge,
-    Triangle,
-    Tetrahedron,
-    Fixed,
-    Mechanical,
-    Multi,
-    Unknown
-};
+enum class ProximityType { Point, Edge, Triangle, Tetrahedron, Fixed, Mechanical, Multi, Unknown };
 
 /*!
  * \brief The BaseProximity class is the basic abstract proximity class
  */
 class BaseElement;
 
-class BaseBaseProximity  {
+class BaseBaseProximity {
 public:
     typedef std::shared_ptr<BaseBaseProximity> SPtr;
 
@@ -39,11 +30,15 @@ public:
 
     virtual sofa::type::Vec3 getVelocity(core::VecDerivId v = core::vec_id::write_access::velocity) const = 0;
 
-    virtual void buildJacobianConstraint(core::MultiMatrixDerivId , const sofa::type::vector<sofa::type::Vec3> & , double , Index ) const = 0;
+    virtual void buildJacobianConstraint(core::MultiMatrixDerivId, const sofa::type::vector<sofa::type::Vec3>&, double,
+                                         Index) const = 0;
 
-    virtual void storeLambda(const core::ConstraintParams* , core::MultiVecDerivId , Index , Index , const sofa::linearalgebra::BaseVector* ) const = 0;
+    virtual void storeLambda(const core::ConstraintParams*, core::MultiVecDerivId, Index, Index,
+                             const sofa::linearalgebra::BaseVector*) const = 0;
 
-    const std::type_info & getTypeInfo() { return typeid(*this); }
+    const std::type_info& getTypeInfo() {
+        return typeid(*this);
+    }
 };
 
 class SOFA_COLLISIONALGORITHM_API BaseProximity : public virtual BaseBaseProximity {
@@ -53,31 +48,38 @@ public:
     virtual ~BaseProximity() = default;
 
     virtual const std::type_info& getTypeInfo() const = 0;
-    
+
     /// Return the proximity type for fast type checking without RTTI
     virtual ProximityType getProximityType() const = 0;
 
-    template<class PROXIMITY,class... ARGS>
+    template <class PROXIMITY, class... ARGS>
     static inline typename PROXIMITY::SPtr create(ARGS... args) {
         return typename PROXIMITY::SPtr(new PROXIMITY(args...));
     }
 
-	virtual SPtr copy() = 0;
+    virtual SPtr copy() = 0;
 
     virtual bool isNormalized() const = 0;
 
     virtual void normalize() = 0;
 
-    virtual double * getBaryCoord() = 0;
+    virtual double* getBaryCoord() = 0;
 
-    virtual sofa::type::Vec3 getPosition(core::VecCoordId = core::vec_id::write_access::position) const override { return  sofa::type::Vec3{}; }
+    virtual sofa::type::Vec3 getPosition(core::VecCoordId = core::vec_id::write_access::position) const override {
+        return sofa::type::Vec3{};
+    }
 
-    virtual sofa::type::Vec3 getVelocity(core::VecDerivId = core::vec_id::write_access::velocity) const override { return  sofa::type::Vec3{}; }
+    virtual sofa::type::Vec3 getVelocity(core::VecDerivId = core::vec_id::write_access::velocity) const override {
+        return sofa::type::Vec3{};
+    }
 
-    virtual void buildJacobianConstraint(core::MultiMatrixDerivId , const sofa::type::vector<sofa::type::Vec3> & , double , Index ) const override {}
+    virtual void buildJacobianConstraint(core::MultiMatrixDerivId, const sofa::type::vector<sofa::type::Vec3>&, double,
+                                         Index) const override {
+    }
 
-    virtual void storeLambda(const core::ConstraintParams* , core::MultiVecDerivId , Index , Index , const sofa::linearalgebra::BaseVector* ) const override {}
-
+    virtual void storeLambda(const core::ConstraintParams*, core::MultiVecDerivId, Index, Index,
+                             const sofa::linearalgebra::BaseVector*) const override {
+    }
 };
 
-}
+}  // namespace sofa::collisionalgorithm

@@ -1,17 +1,16 @@
 ﻿#pragma once
 
-#include <CollisionAlgorithm/config.h>
-#include <CollisionAlgorithm/BaseProximity.h>
 #include <CollisionAlgorithm/BaseGeometry.h>
+#include <CollisionAlgorithm/BaseProximity.h>
+#include <CollisionAlgorithm/config.h>
 
 #include <cstddef>
 
 namespace sofa::collisionalgorithm {
 
-template<class DataTypes>
+template <class DataTypes>
 class MechanicalProximity : public BaseProximity {
 public:
-
     typedef std::shared_ptr<MechanicalProximity<DataTypes> > SPtr;
 
     typedef sofa::core::behavior::MechanicalState<DataTypes> State;
@@ -22,86 +21,89 @@ public:
     typedef typename DataTypes::MatrixDeriv MatrixDeriv;
     typedef typename DataTypes::Deriv Deriv1;
     typedef typename MatrixDeriv::RowIterator MatrixDerivRowIterator;
-    typedef core::objectmodel::Data< VecCoord >        DataVecCoord;
-    typedef core::objectmodel::Data< VecDeriv >        DataVecDeriv;
-    typedef core::objectmodel::Data< MatrixDeriv >     DataMatrixDeriv;
+    typedef core::objectmodel::Data<VecCoord> DataVecCoord;
+    typedef core::objectmodel::Data<VecDeriv> DataVecDeriv;
+    typedef core::objectmodel::Data<MatrixDeriv> DataMatrixDeriv;
 
+    MechanicalProximity(TBaseGeometry<DataTypes>* geo, unsigned pid) : m_geometry(geo), m_pid(pid) {
+    }
 
-    MechanicalProximity(TBaseGeometry<DataTypes> * geo, unsigned pid)
-    : m_geometry(geo)
-    , m_pid(pid) {}
-
-
-    BaseGeometry * getGeometry() const {
+    BaseGeometry* getGeometry() const {
         return m_geometry;
     }
 
-    TBaseGeometry<DataTypes> * getTGeometry() const {
+    TBaseGeometry<DataTypes>* getTGeometry() const {
         return m_geometry;
     }
 
-    void addContributions(MatrixDerivRowIterator & c_it, const sofa::type::Vec3 & N,double fact) const {
+    void addContributions(MatrixDerivRowIterator& c_it, const sofa::type::Vec3& N, double fact) const {
         c_it.addCol(m_pid, N * fact);
     }
 
     /// return proximiy position in a Vec3
     sofa::type::Vec3 getPosition(core::VecCoordId v = core::vec_id::write_access::position) const override {
-        return m_geometry->getPosition(m_pid,v);
+        return m_geometry->getPosition(m_pid, v);
     }
 
     sofa::type::Vec3 getVelocity(core::VecDerivId v = core::vec_id::write_access::velocity) const override {
-        return m_geometry->getVelocity(m_pid,v);
+        return m_geometry->getVelocity(m_pid, v);
     }
 
     unsigned getPId() const {
         return m_pid;
     }
 
-    const std::type_info& getTypeInfo() const override { return typeid(MechanicalProximity<DataTypes>); }
-    
-    ProximityType getProximityType() const override { return ProximityType::Mechanical; }
+    const std::type_info& getTypeInfo() const override {
+        return typeid(MechanicalProximity<DataTypes>);
+    }
 
-    void buildJacobianConstraint(core::MultiMatrixDerivId cId, const sofa::type::vector<sofa::type::Vec3> & dir, double fact, Index constraintId) const override {
-        DataMatrixDeriv & c1_d = *cId[m_geometry->getState()].write();
-        MatrixDeriv & c1 = *c1_d.beginEdit();
+    ProximityType getProximityType() const override {
+        return ProximityType::Mechanical;
+    }
 
-        for (Index j=0;j<static_cast<Index>(dir.size());j++) {
-            MatrixDerivRowIterator c_it = c1.writeLine(constraintId+j);
-            addContributions(c_it,dir[j],fact);
+    void buildJacobianConstraint(core::MultiMatrixDerivId cId, const sofa::type::vector<sofa::type::Vec3>& dir,
+                                 double fact, Index constraintId) const override {
+        DataMatrixDeriv& c1_d = *cId[m_geometry->getState()].write();
+        MatrixDeriv& c1 = *c1_d.beginEdit();
+
+        for (Index j = 0; j < static_cast<Index>(dir.size()); j++) {
+            MatrixDerivRowIterator c_it = c1.writeLine(constraintId + j);
+            addContributions(c_it, dir[j], fact);
         }
 
         c1_d.endEdit();
     }
 
-    void storeLambda(const core::ConstraintParams* cParams, core::MultiVecDerivId resId, Index cid_global, Index cid_local, const sofa::linearalgebra::BaseVector* lambda) const override {
+    void storeLambda(const core::ConstraintParams* cParams, core::MultiVecDerivId resId, Index cid_global,
+                     Index cid_local, const sofa::linearalgebra::BaseVector* lambda) const override {
         auto res = sofa::helper::getWriteAccessor(*resId[m_geometry->getState()].write());
         const typename DataTypes::MatrixDeriv& j = cParams->readJ(m_geometry->getState())->getValue();
-        auto rowIt = j.readLine(cid_global+cid_local);
-        const double f = lambda->element(cid_global+cid_local);
-        for (auto colIt = rowIt.begin(), colItEnd = rowIt.end(); colIt != colItEnd; ++colIt)
-        {
+        auto rowIt = j.readLine(cid_global + cid_local);
+        const double f = lambda->element(cid_global + cid_local);
+        for (auto colIt = rowIt.begin(), colItEnd = rowIt.end(); colIt != colItEnd; ++colIt) {
             if (static_cast<std::size_t>(colIt.index()) == static_cast<std::size_t>(m_pid))
                 res[m_pid] += colIt.val() * f;
         }
     }
 
-	virtual BaseProximity::SPtr copy() override
-	{
-		return SPtr(new MechanicalProximity(m_geometry,m_pid));
-	}
+    virtual BaseProximity::SPtr copy() override {
+        return SPtr(new MechanicalProximity(m_geometry, m_pid));
+    }
 
-    bool isNormalized() const override { return true; }
+    bool isNormalized() const override {
+        return true;
+    }
 
-    void normalize() override {}
+    void normalize() override {
+    }
 
-    double * getBaryCoord() override {
+    double* getBaryCoord() override {
         return nullptr;
     }
 
 protected:
-    TBaseGeometry<DataTypes> * m_geometry;
+    TBaseGeometry<DataTypes>* m_geometry;
     unsigned m_pid;
 };
 
-}
-
+}  // namespace sofa::collisionalgorithm

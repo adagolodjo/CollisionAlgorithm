@@ -1,7 +1,3 @@
-#include <gtest/gtest.h>
-
-#include <cmath>
-
 #include <CollisionAlgorithm/elements/EdgeElement.h>
 #include <CollisionAlgorithm/elements/PointElement.h>
 #include <CollisionAlgorithm/elements/TetrahedronElement.h>
@@ -11,21 +7,21 @@
 #include <CollisionAlgorithm/toolbox/PointToolBox.h>
 #include <CollisionAlgorithm/toolbox/TetrahedronToolBox.h>
 #include <CollisionAlgorithm/toolbox/TriangleToolBox.h>
+#include <gtest/gtest.h>
+
+#include <cmath>
 
 using namespace sofa::collisionalgorithm;
 
-namespace
-{
+namespace {
 
-BaseProximity::SPtr fixedPoint(double x, double y, double z)
-{
+BaseProximity::SPtr fixedPoint(double x, double y, double z) {
     return BaseProximity::SPtr(new FixedProximity(sofa::type::Vec3(x, y, z)));
 }
 
 }  // namespace
 
-TEST(ProjectTest, EdgeProjectionIsClampedToTheSegment)
-{
+TEST(ProjectTest, EdgeProjectionIsClampedToTheSegment) {
     const auto edge = EdgeElement::create(fixedPoint(0, 0, 0), fixedPoint(1, 0, 0));
     const sofa::type::Vec3 P(2, 0, 0);
 
@@ -40,10 +36,8 @@ TEST(ProjectTest, EdgeProjectionIsClampedToTheSegment)
     EXPECT_NEAR(result.distance, (P - result.prox->getPosition()).norm(), 1e-12);
 }
 
-TEST(ProjectTest, TriangleProjectionIsClampedToTheTriangle)
-{
-    const auto triangle = TriangleElement::create(
-        fixedPoint(0, 0, 0), fixedPoint(1, 0, 0), fixedPoint(0, 1, 0));
+TEST(ProjectTest, TriangleProjectionIsClampedToTheTriangle) {
+    const auto triangle = TriangleElement::create(fixedPoint(0, 0, 0), fixedPoint(1, 0, 0), fixedPoint(0, 1, 0));
     const sofa::type::Vec3 P(2, 2, 0);
 
     const Operations::Project::Result result = toolbox::TriangleToolBox::project(P, triangle);
@@ -59,10 +53,9 @@ TEST(ProjectTest, TriangleProjectionIsClampedToTheTriangle)
     EXPECT_NEAR(result.distance, std::sqrt(4.5), 1e-12);
 }
 
-TEST(ProjectTest, TetrahedronProjectionIsClampedToTheTetrahedron)
-{
-    const auto tetrahedron = TetrahedronElement::create(
-        fixedPoint(0, 0, 0), fixedPoint(1, 0, 0), fixedPoint(0, 1, 0), fixedPoint(0, 0, 1));
+TEST(ProjectTest, TetrahedronProjectionIsClampedToTheTetrahedron) {
+    const auto tetrahedron =
+        TetrahedronElement::create(fixedPoint(0, 0, 0), fixedPoint(1, 0, 0), fixedPoint(0, 1, 0), fixedPoint(0, 0, 1));
     const sofa::type::Vec3 P(-1, -1, -1);
 
     const Operations::Project::Result result = toolbox::TetrahedronToolBox::project(P, tetrahedron);
@@ -75,8 +68,7 @@ TEST(ProjectTest, TetrahedronProjectionIsClampedToTheTetrahedron)
     EXPECT_NEAR(result.distance, std::sqrt(3.0), 1e-12);
 }
 
-TEST(ProjectTest, PointProjectionKeepsTheDistanceConsistent)
-{
+TEST(ProjectTest, PointProjectionKeepsTheDistanceConsistent) {
     const auto point = PointElement::create(fixedPoint(1, 2, 3));
     const sofa::type::Vec3 P(1, 2, 5);
 

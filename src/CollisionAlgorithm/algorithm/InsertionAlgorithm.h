@@ -12,12 +12,10 @@
 #include <sofa/component/constraint/lagrangian/solver/ConstraintSolverImpl.h>
 #include <sofa/component/statecontainer/MechanicalObject.h>
 
-namespace sofa::collisionalgorithm
-{
+namespace sofa::collisionalgorithm {
 
-class SOFA_COLLISIONALGORITHM_API InsertionAlgorithm : public BaseAlgorithm
-{
-   public:
+class SOFA_COLLISIONALGORITHM_API InsertionAlgorithm : public BaseAlgorithm {
+public:
     SOFA_CLASS(InsertionAlgorithm, BaseAlgorithm);
 
     typedef core::behavior::MechanicalState<defaulttype::Vec3Types> MechStateTipType;

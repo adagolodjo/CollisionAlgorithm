@@ -1,23 +1,18 @@
 #pragma once
 
-#include <CollisionAlgorithm/config.h>
 #include <CollisionAlgorithm/BaseProximity.h>
+#include <CollisionAlgorithm/config.h>
 #include <CollisionAlgorithm/elements/PointElement.h>
-#include <CollisionAlgorithm/operations/Project.h>
 #include <CollisionAlgorithm/operations/CreateCenterProximity.h>
+#include <CollisionAlgorithm/operations/Project.h>
 
 namespace sofa::collisionalgorithm::toolbox {
 
 class SOFA_COLLISIONALGORITHM_API PointToolBox {
 public:
+    static Operations::CreateCenterProximity::Result createCenterProximity(const PointElement::SPtr& point);
 
-    static Operations::CreateCenterProximity::Result createCenterProximity(const PointElement::SPtr & point);
-
-    static Operations::Project::Result project(const type::Vec3 & P, const PointElement::SPtr & point);
-
+    static Operations::Project::Result project(const type::Vec3& P, const PointElement::SPtr& point);
 };
 
-
-
-}
-
+}  // namespace sofa::collisionalgorithm::toolbox

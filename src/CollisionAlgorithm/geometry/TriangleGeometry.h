@@ -1,13 +1,13 @@
 #pragma once
 
+#include <CollisionAlgorithm/elements/TriangleElement.h>
 #include <CollisionAlgorithm/geometry/EdgeGeometry.h>
 #include <CollisionAlgorithm/proximity/TriangleProximity.h>
-#include <CollisionAlgorithm/elements/TriangleElement.h>
 #include <CollisionAlgorithm/toolbox/TriangleToolBox.h>
 
 namespace sofa::collisionalgorithm {
 
-template<class DataTypes>
+template <class DataTypes>
 class TriangleGeometry : public EdgeGeometry<DataTypes> {
 public:
     typedef DataTypes TDataTypes;
@@ -15,13 +15,14 @@ public:
     typedef TriangleGeometry<DataTypes> GEOMETRY;
     typedef TBaseGeometry<DataTypes> Inherit;
     typedef typename DataTypes::VecCoord VecCoord;
-    typedef core::objectmodel::Data< VecCoord >        DataVecCoord;
-    typedef std::function<BaseProximity::SPtr(const TriangleElement * elmt, double f0,double f1,double f2)> ProximityCreatorFunc;
+    typedef core::objectmodel::Data<VecCoord> DataVecCoord;
+    typedef std::function<BaseProximity::SPtr(const TriangleElement* elmt, double f0, double f1, double f2)>
+        ProximityCreatorFunc;
 
-    SOFA_CLASS(GEOMETRY,Inherit);
+    SOFA_CLASS(GEOMETRY, Inherit);
 
     void buildTriangleElements() override {
-        for (unsigned i=0;i<this->l_topology->getNbTriangles();i++) {
+        for (unsigned i = 0; i < this->l_topology->getNbTriangles(); i++) {
             auto triangle = this->l_topology->getTriangle(i);
             auto edgeId = this->l_topology->getEdgesInTriangle(i);
 
@@ -37,9 +38,9 @@ public:
         }
     }
 
-    inline ElementIterator::SPtr begin(unsigned id = 0) const override { return this->triangleBegin(id); }
-
+    inline ElementIterator::SPtr begin(unsigned id = 0) const override {
+        return this->triangleBegin(id);
+    }
 };
 
-}
-
+}  // namespace sofa::collisionalgorithm

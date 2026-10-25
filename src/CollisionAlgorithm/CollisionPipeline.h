@@ -4,40 +4,35 @@
 #include <CollisionAlgorithm/BaseElement.h>
 #include <CollisionAlgorithm/BaseProximity.h>
 #include <sofa/core/BehaviorModel.h>
-#include <sofa/core/visual/VisualParams.h>
 #include <sofa/core/objectmodel/DataCallback.h>
-#include <sofa/simulation/Visitor.h>
-#include <sofa/gl/gl.h>
-#include <sofa/simulation/events/AnimateBeginEvent.h>
 #include <sofa/core/topology/BaseMeshTopology.h>
-#include <CollisionAlgorithm/BaseElement.h>
-#include <sofa/simulation/Node.h>
+#include <sofa/core/visual/VisualParams.h>
+#include <sofa/gl/gl.h>
 #include <sofa/helper/AdvancedTimer.h>
+#include <sofa/simulation/Node.h>
+#include <sofa/simulation/Visitor.h>
+#include <sofa/simulation/events/AnimateBeginEvent.h>
 
 namespace sofa ::collisionalgorithm {
 
 class SOFA_COLLISIONALGORITHM_API CollisionComponent : public core::objectmodel::BaseObject {
 public:
-
     virtual void prepareDetection() = 0;
-
 };
 
 class SOFA_COLLISIONALGORITHM_API CollisionAlgorithm : public core::objectmodel::BaseObject {
 public:
-
     virtual void doDetection() = 0;
-
 };
 
 class SOFA_COLLISIONALGORITHM_API CollisionLoop : public core::objectmodel::BaseObject {
 public:
-
-    SOFA_ABSTRACT_CLASS(CollisionLoop,core::objectmodel::BaseObject);
+    SOFA_ABSTRACT_CLASS(CollisionLoop, core::objectmodel::BaseObject);
 
     class UpdateComponentVisitor : public simulation::Visitor {
     public:
-        UpdateComponentVisitor() : Visitor(sofa::core::ExecParams::defaultInstance()) {}
+        UpdateComponentVisitor() : Visitor(sofa::core::ExecParams::defaultInstance()) {
+        }
 
         Visitor::Result processNodeTopDown(simulation::Node* node) override {
             for_each(this, node, node->object, &UpdateComponentVisitor::processObject);
@@ -45,18 +40,20 @@ public:
         }
 
         void processObject(simulation::Node*, core::objectmodel::BaseObject* obj) {
-            if (CollisionComponent * component = dynamic_cast<CollisionComponent *>(obj)) {
+            if (CollisionComponent* component = dynamic_cast<CollisionComponent*>(obj)) {
                 component->prepareDetection();
             }
         }
 
-        const char* getClassName() const override {return "UpdateComponentVisitor";}
+        const char* getClassName() const override {
+            return "UpdateComponentVisitor";
+        }
     };
-
 
     class UpdateAlgorithmVisitor : public simulation::Visitor {
     public:
-        UpdateAlgorithmVisitor() : Visitor(sofa::core::ExecParams::defaultInstance()) {}
+        UpdateAlgorithmVisitor() : Visitor(sofa::core::ExecParams::defaultInstance()) {
+        }
 
         Visitor::Result processNodeTopDown(simulation::Node* node) override {
             for_each(this, node, node->object, &UpdateAlgorithmVisitor::processObject);
@@ -64,22 +61,24 @@ public:
         }
 
         void processObject(simulation::Node*, core::objectmodel::BaseObject* obj) {
-            if (CollisionAlgorithm * component = dynamic_cast<CollisionAlgorithm *>(obj)) {
-                sofa::helper::AdvancedTimer::stepBegin("doDetection - "+obj->getName());
+            if (CollisionAlgorithm* component = dynamic_cast<CollisionAlgorithm*>(obj)) {
+                sofa::helper::AdvancedTimer::stepBegin("doDetection - " + obj->getName());
                 component->doDetection();
-                sofa::helper::AdvancedTimer::stepEnd("doDetection - "+obj->getName());
+                sofa::helper::AdvancedTimer::stepEnd("doDetection - " + obj->getName());
             }
         }
 
-        const char* getClassName() const override {return "UpdateAlgorithmVisitor";}
+        const char* getClassName() const override {
+            return "UpdateAlgorithmVisitor";
+        }
     };
 
     CollisionLoop() {
         this->f_listening.setValue(true);
     }
 
-    void handleEvent(sofa::core::objectmodel::Event *event) override {
-        if (! dynamic_cast<sofa::simulation::AnimateBeginEvent*>(event)) return;
+    void handleEvent(sofa::core::objectmodel::Event* event) override {
+        if (!dynamic_cast<sofa::simulation::AnimateBeginEvent*>(event)) return;
 
         sofa::helper::AdvancedTimer::stepBegin("Visitor component");
         UpdateComponentVisitor v_comp;
@@ -91,8 +90,6 @@ public:
         v_algo.execute(this->getContext());
         sofa::helper::AdvancedTimer::stepEnd("Visitor algo");
     }
-
 };
 
-}
-
+}  // namespace sofa::collisionalgorithm

@@ -1,5 +1,4 @@
 #include <CollisionAlgorithm/initCollisionAlgorithm.h>
-
 #include <sofa/core/ObjectFactory.h>
 #include <sofa/helper/system/FileRepository.h>
 #include <sofa/helper/system/PluginManager.h>
@@ -12,8 +11,7 @@
 #define Q(x) #x
 #define QUOTE(x) Q(x)
 
-namespace sofa::collisionalgorithm
-{
+namespace sofa::collisionalgorithm {
 
 // CollisionPipeline
 extern void registerCollisionLoop(sofa::core::ObjectFactory* factory);
@@ -36,21 +34,18 @@ extern void registerEdgeGeometry(sofa::core::ObjectFactory* factory);
 extern void registerTriangleGeometry(sofa::core::ObjectFactory* factory);
 extern void registerTetrahedronGeometry(sofa::core::ObjectFactory* factory);
 
-extern "C"
-{
-    SOFA_COLLISIONALGORITHM_API void initExternalModule();
-    SOFA_COLLISIONALGORITHM_API const char* getModuleName();
-    SOFA_COLLISIONALGORITHM_API const char* getModuleVersion();
-    SOFA_COLLISIONALGORITHM_API const char* getModuleLicense();
-    SOFA_COLLISIONALGORITHM_API const char* getModuleDescription();
-    SOFA_COLLISIONALGORITHM_API void registerObjects(sofa::core::ObjectFactory* factory);
+extern "C" {
+SOFA_COLLISIONALGORITHM_API void initExternalModule();
+SOFA_COLLISIONALGORITHM_API const char* getModuleName();
+SOFA_COLLISIONALGORITHM_API const char* getModuleVersion();
+SOFA_COLLISIONALGORITHM_API const char* getModuleLicense();
+SOFA_COLLISIONALGORITHM_API const char* getModuleDescription();
+SOFA_COLLISIONALGORITHM_API void registerObjects(sofa::core::ObjectFactory* factory);
 }
 
-void initCollisionAlgorithm() 
-{
+void initCollisionAlgorithm() {
     static bool first = true;
-    if (first)
-    {
+    if (first) {
         // make sure that this plugin is registered into the PluginManager
         sofa::helper::system::PluginManager::getInstance().registerPlugin(MODULE_NAME);
 
@@ -58,20 +53,19 @@ void initCollisionAlgorithm()
 #ifdef PLUGIN_DATA_DIR
         sofa::helper::system::DataRepository.addLastPath(std::string(QUOTE(PLUGIN_DATA_DIR)));
 #endif
-        sofa::helper::system::DataRepository.addLastPath(
-            sofa::helper::system::SetDirectory::GetCurrentDir());
+        sofa::helper::system::DataRepository.addLastPath(sofa::helper::system::SetDirectory::GetCurrentDir());
     }
 }
 
-void initExternalModule()
-{
+void initExternalModule() {
     initCollisionAlgorithm();
 }
 
-const char* getModuleName() { return MODULE_NAME; }
+const char* getModuleName() {
+    return MODULE_NAME;
+}
 
-const char* getModuleVersion()
-{
+const char* getModuleVersion() {
 #ifdef PLUGIN_GIT_INFO
     return QUOTE(PLUGIN_GIT_INFO);
 #else
@@ -79,12 +73,15 @@ const char* getModuleVersion()
 #endif
 }
 
-const char* getModuleLicense() { return "GPLv3"; }
+const char* getModuleLicense() {
+    return "GPLv3";
+}
 
-const char* getModuleDescription() { return "Plugin for collision detection"; }
+const char* getModuleDescription() {
+    return "Plugin for collision detection";
+}
 
-void registerObjects(sofa::core::ObjectFactory* factory)
-{
+void registerObjects(sofa::core::ObjectFactory* factory) {
     // Register CollisionPipeline
     registerCollisionLoop(factory);
     // Register Algorithms
@@ -103,4 +100,4 @@ void registerObjects(sofa::core::ObjectFactory* factory)
     registerTetrahedronGeometry(factory);
 }
 
-}  // namespace collisionalgorithm
+}  // namespace sofa::collisionalgorithm

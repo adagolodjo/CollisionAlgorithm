@@ -1,76 +1,62 @@
+#include <CollisionAlgorithm/broadphase/AABBBroadPhase.h>
 #include <gtest/gtest.h>
-
-#include <sstream>
-#include <string>
-
 #include <sofa/core/ExecParams.h>
 #include <sofa/simulation/Node.h>
 #include <sofa/simulation/common/SceneLoaderXML.h>
 #include <sofa/testing/BaseSimulationTest.h>
 
-#include <CollisionAlgorithm/broadphase/AABBBroadPhase.h>
+#include <sstream>
+#include <string>
 
 using sofa::simulation::Node;
 using sofa::simulation::SceneLoaderXML;
 using sofa::testing::BaseSimulationTest;
 
-namespace
-{
+namespace {
 
-std::string makeScene(const std::string& positions, const std::string& nbox, int method)
-{
+std::string makeScene(const std::string& positions, const std::string& nbox, int method) {
     std::stringstream scene;
     scene << "<Node name='root'>"
           << "<MechanicalObject name='mstate' template='Vec3' position='" << positions << "'/>"
           << "<PointGeometry name='geometry' mstate='@mstate'/>"
-          << "<AABBBroadPhase name='broadPhase' geometry='@geometry' nbox='" << nbox
-          << "' method='" << method << "'/>"
+          << "<AABBBroadPhase name='broadPhase' geometry='@geometry' nbox='" << nbox << "' method='" << method << "'/>"
           << "</Node>";
     return scene.str();
 }
 
-unsigned indexedCount(sofa::collisionalgorithm::AABBBroadPhase* broadPhase)
-{
+unsigned indexedCount(sofa::collisionalgorithm::AABBBroadPhase* broadPhase) {
     const sofa::type::Vec3i nbox = broadPhase->getNbox();
     unsigned count = 0;
     for (int i = 0; i < nbox[0]; ++i)
         for (int j = 0; j < nbox[1]; ++j)
-            for (int k = 0; k < nbox[2]; ++k)
-                count += static_cast<unsigned>(broadPhase->getElementSet(i, j, k).size());
+            for (int k = 0; k < nbox[2]; ++k) count += static_cast<unsigned>(broadPhase->getElementSet(i, j, k).size());
     return count;
 }
 
 }  // namespace
 
-class AABBBroadPhaseTest : public BaseSimulationTest
-{
+class AABBBroadPhaseTest : public BaseSimulationTest {
 public:
     Node::SPtr root;
 
-    void doSetUp() override
-    {
+    void doSetUp() override {
         this->loadPlugins({"Sofa.Component.StateContainer", "CollisionAlgorithm"});
     }
 
-    void doTearDown() override
-    {
-        if (root)
-            sofa::simulation::node::unload(root);
+    void doTearDown() override {
+        if (root) sofa::simulation::node::unload(root);
         root.reset();
     }
 
-    sofa::collisionalgorithm::AABBBroadPhase* load(const std::string& scene)
-    {
+    sofa::collisionalgorithm::AABBBroadPhase* load(const std::string& scene) {
         root = SceneLoaderXML::loadFromMemory("testscene", scene.c_str());
-        if (!root)
-            return nullptr;
+        if (!root) return nullptr;
         root->init(sofa::core::execparams::defaultInstance());
         return dynamic_cast<sofa::collisionalgorithm::AABBBroadPhase*>(root->getObject("broadPhase"));
     }
 };
 
-TEST_F(AABBBroadPhaseTest, ReportsCellCount)
-{
+TEST_F(AABBBroadPhaseTest, ReportsCellCount) {
     auto* broadPhase = load(makeScene("0 0 0  1 1 1", "2 2 2", 2));
     ASSERT_NE(broadPhase, nullptr);
 
@@ -80,12 +66,10 @@ TEST_F(AABBBroadPhaseTest, ReportsCellCount)
     EXPECT_EQ(nbox[2], 3);
 }
 
-TEST_F(AABBBroadPhaseTest, IndexesEveryPoint)
-{
+TEST_F(AABBBroadPhaseTest, IndexesEveryPoint) {
     const std::string positions = "0 0 0  1 0 0  1 1 0  0 1 0  0 0 1  1 0 1  1 1 1  0 1 1";
 
-    for (int method : {0, 1, 2})
-    {
+    for (int method : {0, 1, 2}) {
         auto* broadPhase = load(makeScene(positions, "2 2 2", method));
         ASSERT_NE(broadPhase, nullptr) << "method=" << method;
 
@@ -94,8 +78,7 @@ TEST_F(AABBBroadPhaseTest, IndexesEveryPoint)
     }
 }
 
-TEST_F(AABBBroadPhaseTest, HandlesZeroExtentAxis)
-{
+TEST_F(AABBBroadPhaseTest, HandlesZeroExtentAxis) {
     auto* broadPhase = load(makeScene("0 0 0  1 0 0  1 1 0  0 1 0", "2 2 2", 2));
     ASSERT_NE(broadPhase, nullptr);
 
@@ -109,8 +92,7 @@ TEST_F(AABBBroadPhaseTest, HandlesZeroExtentAxis)
     EXPECT_EQ(indexedCount(broadPhase), 4u);
 }
 
-TEST_F(AABBBroadPhaseTest, OutOfRangeQueryIsEmpty)
-{
+TEST_F(AABBBroadPhaseTest, OutOfRangeQueryIsEmpty) {
     auto* broadPhase = load(makeScene("0 0 0  1 1 1", "2 2 2", 2));
     ASSERT_NE(broadPhase, nullptr);
 

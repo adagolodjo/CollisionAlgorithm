@@ -1,9 +1,9 @@
 #pragma once
 
-#include <sofa/helper/AdvancedTimer.h>
 #include <CollisionAlgorithm/BaseAABBBroadPhase.h>
 #include <CollisionAlgorithm/BaseAlgorithm.h>
 #include <CollisionAlgorithm/BaseElement.h>
+#include <sofa/helper/AdvancedTimer.h>
 
 namespace sofa::collisionalgorithm {
 
@@ -18,7 +18,6 @@ namespace sofa::collisionalgorithm {
  */
 class SOFA_COLLISIONALGORITHM_API AABBBroadPhase : public BaseAABBBroadPhase {
 public:
-
     /**
      * @brief The macro used to register the class in the Sofa framework.
      *
@@ -33,7 +32,8 @@ public:
      * Initializes the `AABBBroadPhase` object. Currently, the constructor does not perform
      * any specific initialization beyond calling the base class constructor.
      */
-    AABBBroadPhase() {}
+    AABBBroadPhase() {
+    }
 
     /**
      * @brief Updates the offset values used for indexing the elements in the grid.
@@ -91,9 +91,7 @@ public:
      * @param elmt A smart pointer to the element to be added.
      */
     void addElement(int i, int j, int k, BaseElement::SPtr elmt) override {
-        if (i < 0 || j < 0 || k < 0 ||
-            i >= m_nbox[0] || j >= m_nbox[1] || k >= m_nbox[2])
-            return;
+        if (i < 0 || j < 0 || k < 0 || i >= m_nbox[0] || j >= m_nbox[1] || k >= m_nbox[2]) return;
 
         m_offset[0] = m_nbox[1] * m_nbox[2];
         m_offset[1] = m_nbox[2];
