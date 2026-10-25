@@ -79,7 +79,7 @@ const char* getModuleVersion()
 #endif
 }
 
-const char* getModuleLicense() { return "LGPL"; }
+const char* getModuleLicense() { return "GPLv3"; }
 
 const char* getModuleDescription() { return "Plugin for collision detection"; }
 

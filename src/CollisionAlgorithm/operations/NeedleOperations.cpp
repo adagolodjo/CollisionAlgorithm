@@ -22,7 +22,7 @@ bool prunePointsUsingEdges(std::vector<BaseProximity::SPtr>& couplingPts,
     const type::Vec3 tipVelocity = edge->getP1()->getVelocity();
     if (dot(tipVelocity, edgeDirection) >= 0_sreal) return false;
 
-    const int initSize = couplingPts.size();
+    const auto initSize = couplingPts.size();
 
     while(!couplingPts.empty())
     {

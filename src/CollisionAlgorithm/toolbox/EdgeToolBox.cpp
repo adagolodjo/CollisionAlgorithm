@@ -15,10 +15,9 @@ Operations::Project::Result EdgeToolBox::project(const type::Vec3 & P, const Edg
     projectOnEdge(P,P0,P1,fact_u,fact_v);
 
     BaseProximity::SPtr prox = EdgeProximity::create(edge,fact_u,fact_v);
-    BaseProximity::SPtr prox_normalized = prox->copy();
-    prox_normalized->normalize();
+    prox->normalize();
 
-    double dist = (P-prox_normalized->getPosition()).norm();
+    double dist = (P-prox->getPosition()).norm();
 
     return Operations::Project::Result(dist,prox);
 }

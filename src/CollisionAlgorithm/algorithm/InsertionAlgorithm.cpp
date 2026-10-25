@@ -158,7 +158,6 @@ InsertionAlgorithm::AlgorithmOutput InsertionAlgorithm::puncturePhase()
     auto projectOnSurf = Operations::Project::Operation::get(l_surfGeom);
     auto createTipProximity =
         Operations::CreateCenterProximity::Operation::get(l_tipGeom->getTypeInfo());
-    auto projectOnTip = Operations::Project::Operation::get(l_tipGeom);
     const FilterFUNC filter = getFilterFunc();
 
     const SReal punctureForceThreshold = d_punctureForceThreshold.getValue();

@@ -43,7 +43,7 @@ public:
     , d_output(initData(&d_output,"output", "output of the collision detection"))
     {}
 
-    void draw(const core::visual::VisualParams* vparams) {
+    void draw(const core::visual::VisualParams* vparams) override {
         if (! vparams->displayFlags().getShowCollisionModels() && ! d_drawCollision.getValue()) return;
         glDisable(GL_LIGHTING);
         glColor4f(0,1,0,1);
@@ -103,7 +103,7 @@ public:
     }
 
 
-    void doDetection() {
+    void doDetection() override {
         if (l_from == NULL) return;
         if (l_dest == NULL) return;
 
@@ -111,7 +111,11 @@ public:
         output.clear();
 
         auto itfrom = l_from->pointBegin();
-        if (itfrom->end()) return;
+        if (itfrom->end())
+        {
+            d_output.endEdit();
+            return;
+        }
 
         auto createProximityOp = Operations::CreateCenterProximity::Operation::get(itfrom->getTypeInfo());
 //        auto findClosestProxOp = Operations::FindClosestProximity::Operation::get(l_dest);

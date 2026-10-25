@@ -4,6 +4,8 @@
 #include <CollisionAlgorithm/BaseProximity.h>
 #include <CollisionAlgorithm/BaseGeometry.h>
 
+#include <cstddef>
+
 namespace sofa::collisionalgorithm {
 
 template<class DataTypes>
@@ -43,11 +45,11 @@ public:
     }
 
     /// return proximiy position in a Vec3
-    sofa::type::Vec3 getPosition(core::VecCoordId v = core::vec_id::write_access::position) const {
+    sofa::type::Vec3 getPosition(core::VecCoordId v = core::vec_id::write_access::position) const override {
         return m_geometry->getPosition(m_pid,v);
     }
 
-    sofa::type::Vec3 getVelocity(core::VecDerivId v = core::vec_id::write_access::velocity) const {
+    sofa::type::Vec3 getVelocity(core::VecDerivId v = core::vec_id::write_access::velocity) const override {
         return m_geometry->getVelocity(m_pid,v);
     }
 
@@ -63,7 +65,7 @@ public:
         DataMatrixDeriv & c1_d = *cId[m_geometry->getState()].write();
         MatrixDeriv & c1 = *c1_d.beginEdit();
 
-        for (Index j=0;j<dir.size();j++) {
+        for (Index j=0;j<static_cast<Index>(dir.size());j++) {
             MatrixDerivRowIterator c_it = c1.writeLine(constraintId+j);
             addContributions(c_it,dir[j],fact);
         }
@@ -78,7 +80,7 @@ public:
         const double f = lambda->element(cid_global+cid_local);
         for (auto colIt = rowIt.begin(), colItEnd = rowIt.end(); colIt != colItEnd; ++colIt)
         {
-            if (colIt.index() == m_pid)
+            if (static_cast<std::size_t>(colIt.index()) == static_cast<std::size_t>(m_pid))
                 res[m_pid] += colIt.val() * f;
         }
     }

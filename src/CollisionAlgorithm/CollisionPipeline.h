@@ -1,7 +1,6 @@
 #pragma once
 
 //#include <CollisionAlgorithm/BaseOperation.h>
-#include <sofa/simulation/CollisionBeginEvent.h>
 #include <CollisionAlgorithm/BaseElement.h>
 #include <CollisionAlgorithm/BaseProximity.h>
 #include <sofa/core/BehaviorModel.h>
@@ -9,7 +8,7 @@
 #include <sofa/core/objectmodel/DataCallback.h>
 #include <sofa/simulation/Visitor.h>
 #include <sofa/gl/gl.h>
-#include <sofa/simulation/AnimateBeginEvent.h>
+#include <sofa/simulation/events/AnimateBeginEvent.h>
 #include <sofa/core/topology/BaseMeshTopology.h>
 #include <CollisionAlgorithm/BaseElement.h>
 #include <sofa/simulation/Node.h>
@@ -40,7 +39,7 @@ public:
     public:
         UpdateComponentVisitor() : Visitor(sofa::core::ExecParams::defaultInstance()) {}
 
-        Visitor::Result processNodeTopDown(simulation::Node* node) {
+        Visitor::Result processNodeTopDown(simulation::Node* node) override {
             for_each(this, node, node->object, &UpdateComponentVisitor::processObject);
             return Visitor::RESULT_CONTINUE;
         }
@@ -51,7 +50,7 @@ public:
             }
         }
 
-        virtual const char* getClassName() const {return "UpdateComponentVisitor";}
+        const char* getClassName() const override {return "UpdateComponentVisitor";}
     };
 
 
@@ -59,7 +58,7 @@ public:
     public:
         UpdateAlgorithmVisitor() : Visitor(sofa::core::ExecParams::defaultInstance()) {}
 
-        Visitor::Result processNodeTopDown(simulation::Node* node) {
+        Visitor::Result processNodeTopDown(simulation::Node* node) override {
             for_each(this, node, node->object, &UpdateAlgorithmVisitor::processObject);
             return Visitor::RESULT_CONTINUE;
         }
@@ -72,14 +71,14 @@ public:
             }
         }
 
-        virtual const char* getClassName() const {return "UpdateAlgorithmVisitor";}
+        const char* getClassName() const override {return "UpdateAlgorithmVisitor";}
     };
 
     CollisionLoop() {
         this->f_listening.setValue(true);
     }
 
-    void handleEvent(sofa::core::objectmodel::Event *event) {
+    void handleEvent(sofa::core::objectmodel::Event *event) override {
         if (! dynamic_cast<sofa::simulation::AnimateBeginEvent*>(event)) return;
 
         sofa::helper::AdvancedTimer::stepBegin("Visitor component");

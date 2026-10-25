@@ -54,8 +54,8 @@ Supported SOFA version: v25.06 and above
 
 - doc:
     - Code documentation
-- scenes:
-    - Various simple demo scenes
+- examples:
+    - Various simple demo scenes (Python)
 - src/CollisionAlgorithm:
     - SOFA components implementing the insertion algorithm and the supporting collision pipeline
 - regression:
@@ -83,7 +83,7 @@ This component manages the needle insertion algorithm. It can work simultaneousl
 and can thus be added incrementally in existing SOFA scenes where contacts and collisions are modelled. 
 
 - Create a node to represent the needle and additional nodes for the needle tip and shaft geometries.
-This step is more detailed, so refer to the examples in `scenes/NeedleInsertion.xml` for guidance.
+This step is more detailed, so refer to the examples in `examples/NeedleInsertion.py` for guidance.
 
 - Add an `InsertionAlgorithm` component inside the needle node as shown below.
 ```

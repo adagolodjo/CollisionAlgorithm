@@ -508,7 +508,7 @@ public:
     }
 
 
-    void draw(const core::visual::VisualParams * vparams) {
+    void draw(const core::visual::VisualParams * vparams) override {
         if (! vparams->displayFlags().getShowBoundingCollisionModels()) return;
 
         type::RGBAColor color(1,0,0,1);

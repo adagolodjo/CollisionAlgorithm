@@ -6,6 +6,9 @@ sofa_find_package(Sofa.Component.StateContainer REQUIRED)
 set(UNIT_TEST_SOURCES
     FirstAlgorithmTest.cpp
     AABBBroadPhaseTest.cpp
+    Find2DClosestProximityTest.cpp
+    ProjectTest.cpp
+    SubsetGeometryTest.cpp
 )
 
 foreach(test_file ${UNIT_TEST_SOURCES})

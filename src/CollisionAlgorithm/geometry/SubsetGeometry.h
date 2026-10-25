@@ -4,6 +4,8 @@
 #include <CollisionAlgorithm/proximity/PointProximity.h>
 #include <CollisionAlgorithm/toolbox/PointToolBox.h>
 
+#include <algorithm>
+
 namespace sofa::collisionalgorithm {
 
 template<class DataTypes>
@@ -33,27 +35,46 @@ public:
 //        return pos[pid];
 //    }
 
-	void init()
+	void init() override
 	{
-		type::vector<int>  indices = d_indices.getValue();
+		type::vector<int> indices = d_indices.getValue();
 
 		std::sort(indices.begin(), indices.end());
+		indices.erase(std::unique(indices.begin(), indices.end()), indices.end());
 
 		m_elements.clear();
-		auto iter = l_geometry->begin();
 
-		int id=0;
-		for(int keepId : indices)
+		if (l_geometry == nullptr)
 		{
-			while(id != keepId)
+			msg_error() << "SubsetGeometry has no linked geometry, no element will be used.";
+			return;
+		}
+
+		auto iter = l_geometry->begin();
+		int id = 0;
+		for (int keepId : indices)
+		{
+			if (keepId < 0 || keepId < id)
+			{
+				msg_warning() << "Invalid or duplicated index " << keepId << ", skipping.";
+				continue;
+			}
+
+			while (id < keepId && !iter->end())
 			{
 				++id;
 				iter++;
 			}
+
+			if (iter->end())
+			{
+				msg_warning() << "Index " << keepId
+				              << " is out of range, ignoring the remaining indices.";
+				break;
+			}
+
 			m_elements.push_back(iter->element());
 		}
-		std::cout<<"SubsetGeometry : "<<m_elements.size()<<std::endl;
-
 	}
 
 

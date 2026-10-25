@@ -146,7 +146,7 @@ struct DetectionOutputTypeInfo
 };
 
 template<>
-struct DataTypeInfo< collisionalgorithm::DetectionOutput<collisionalgorithm::BaseProximity::SPtr, collisionalgorithm::BaseProximity::SPtr> > : public DetectionOutputTypeInfo< collisionalgorithm::DetectionOutput<collisionalgorithm::BaseProximity::SPtr, collisionalgorithm::BaseProximity::SPtr> >
+struct DataTypeInfo< collisionalgorithm::DetectionOutput<collisionalgorithm::BaseProximity, collisionalgorithm::BaseProximity> > : public DetectionOutputTypeInfo< collisionalgorithm::DetectionOutput<collisionalgorithm::BaseProximity, collisionalgorithm::BaseProximity> >
 {
     static std::string name() { std::ostringstream o; o << "DetectionOutput"; return o.str(); }
 };

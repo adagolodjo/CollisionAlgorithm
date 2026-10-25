@@ -21,10 +21,9 @@ Operations::Project::Result TetrahedronToolBox::project(const type::Vec3 & P, co
     projectOnTetra(P, tetra->getTetrahedronInfo(),fact[0],fact[1],fact[2],fact[3]);
 
     BaseProximity::SPtr prox = TetrahedronProximity::create(tetra, fact[0],fact[1],fact[2],fact[3]);
-	BaseProximity::SPtr prox_normalized = prox->copy();
-    prox_normalized->normalize();
+    prox->normalize();
 
-    double dist = (prox_normalized->getPosition() - P).norm();
+    double dist = (prox->getPosition() - P).norm();
 
     return Operations::Project::Result(dist,prox);
 }

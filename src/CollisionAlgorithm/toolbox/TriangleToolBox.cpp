@@ -21,10 +21,9 @@ Operations::Project::Result TriangleToolBox::project(const type::Vec3 & P, const
     projectOnTriangle(P,tri->getTriangleInfo(),fact_u,fact_v,fact_w);
 
     TriangleProximity::SPtr prox = TriangleProximity::create(tri, fact_u,fact_v,fact_w);
-    BaseProximity::SPtr prox_normalized = prox->copy();
-    prox_normalized->normalize();
+    prox->normalize();
 
-    double dist = (prox_normalized->getPosition() - P).norm();
+    double dist = (prox->getPosition() - P).norm();
 
     return Operations::Project::Result(dist,prox);
 }

@@ -36,7 +36,7 @@ public:
             l_geometry.setPath("@.");
         }
 
-        void init() {
+        void init() override {
             if (l_geometry != NULL) l_geometry->setBroadPhase(this);
         }
 
@@ -70,7 +70,7 @@ public:
         this->f_listening.setValue(true);
     }
 
-    void init() {
+    void init() override {
         m_pointElements.clear();
         m_edgeElements.clear();
         m_triangleElements.clear();
@@ -91,7 +91,7 @@ public:
 
     virtual void buildTetrahedronElements() {}
 
-    virtual void prepareDetection() {
+    void prepareDetection() override {
         std::string timerName = std::string("Timer for ") + typeid(*this).name();
 //        sofa::helper::AdvancedTimer::stepBegin(timerName.c_str());
         for (unsigned i=0;i<m_pointElements.size();i++) m_pointElements[i]->setDirty(true);
@@ -254,7 +254,7 @@ public:
 
 //	inline std::vector<BaseElement::SPtr > getBaseElements() = 0;
 
-    inline void storeLambda(const core::ConstraintParams* cParams, core::MultiVecDerivId resId, Index cid_global, Index cid_local, const sofa::linearalgebra::BaseVector* lambda) const {
+    inline void storeLambda(const core::ConstraintParams* cParams, core::MultiVecDerivId resId, Index /*cid_global*/, Index /*cid_local*/, const sofa::linearalgebra::BaseVector* lambda) const {
         auto res = sofa::helper::getWriteAccessor(*resId[this->getState()].write());
         const typename DataTypes::MatrixDeriv& j = cParams->readJ(this->getState())->getValue();
         j.multTransposeBaseVector(res, lambda );

@@ -14,13 +14,13 @@ public:
     : m_proximities(prox){}
 
     /// return proximiy position in a Vec3
-    sofa::type::Vec3 getPosition(core::VecCoordId v) const {
+    sofa::type::Vec3 getPosition(core::VecCoordId v) const override {
         sofa::type::Vec3 P(0,0,0);
         for (unsigned i=0;i<m_proximities.size();i++) P+=m_proximities[i]->getPosition(v);
         return P*1.0/m_proximities.size();
     }
 
-    sofa::type::Vec3 getVelocity(core::VecDerivId v) const {
+    sofa::type::Vec3 getVelocity(core::VecDerivId v) const override {
         sofa::type::Vec3 P(0,0,0);
         for (unsigned i=0;i<m_proximities.size();i++) P+=m_proximities[i]->getVelocity(v);
         return P*1.0/m_proximities.size();
@@ -43,7 +43,7 @@ public:
     
     ProximityType getProximityType() const override { return ProximityType::Multi; }
 
-	virtual BaseProximity::SPtr copy() override
+	BaseProximity::SPtr copy() override
 	{
 		return SPtr(new MultiProximity(m_proximities));
 	}
