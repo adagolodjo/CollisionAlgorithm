@@ -1,4 +1,5 @@
 #include <CollisionAlgorithm/algorithm/InsertionAlgorithm.h>
+#include <CollisionAlgorithm/filters/DistanceFilter.h>
 #include <sofa/core/ObjectFactory.h>
 
 namespace sofa::collisionalgorithm {
@@ -34,6 +35,15 @@ InsertionAlgorithm::InsertionAlgorithm()
       d_drawPoints(initData(&d_drawPoints, false, "drawPoints", "Draw detection outputs.")),
       d_drawPointsScale(
           initData(&d_drawPointsScale, 0.0005, "drawPointsScale", "Scale the drawing of detection output points.")) {
+}
+
+double InsertionAlgorithm::getFilterMaxDistance() const {
+    double maxDistance = std::numeric_limits<double>::max();
+    for (const auto& filter : m_filters) {
+        if (const auto* distanceFilter = dynamic_cast<const DistanceFilter*>(filter.get()))
+            maxDistance = std::min(maxDistance, distanceFilter->d_distance.getValue());
+    }
+    return maxDistance;
 }
 
 void InsertionAlgorithm::init() {
@@ -130,6 +140,7 @@ InsertionAlgorithm::AlgorithmOutput InsertionAlgorithm::puncturePhase() {
     auto projectOnSurf = Operations::Project::Operation::get(l_surfGeom);
     auto createTipProximity = Operations::CreateCenterProximity::Operation::get(l_tipGeom->getTypeInfo());
     const FilterFUNC filter = getFilterFunc();
+    const double maxDistance = getFilterMaxDistance();
 
     const SReal punctureForceThreshold = d_punctureForceThreshold.getValue();
     for (auto itTip = l_tipGeom->begin(); itTip != l_tipGeom->end(); itTip++) {
@@ -137,7 +148,7 @@ InsertionAlgorithm::AlgorithmOutput InsertionAlgorithm::puncturePhase() {
 
         if (!tipProx) continue;
 
-        const BaseProximity::SPtr surfProx = findClosestProxOnSurf(tipProx, l_surfGeom.get(), projectOnSurf, filter);
+        const BaseProximity::SPtr surfProx = findClosestProxOnSurf(tipProx, l_surfGeom.get(), projectOnSurf, filter, maxDistance);
         if (surfProx) {
             surfProx->normalize();
 
@@ -181,13 +192,14 @@ InsertionAlgorithm::AlgorithmOutput InsertionAlgorithm::shaftCollisionPhase() {
     auto createShaftProximity = Operations::CreateCenterProximity::Operation::get(l_shaftGeom->getTypeInfo());
     auto projectOnShaft = Operations::Project::Operation::get(l_shaftGeom);
     const FilterFUNC filter = getFilterFunc();
+    const double maxDistance = getFilterMaxDistance();
 
     for (auto itShaft = l_shaftGeom->begin(); itShaft != l_shaftGeom->end(); itShaft++) {
         BaseProximity::SPtr shaftProx = createShaftProximity(itShaft->element());
 
         if (!shaftProx) continue;
 
-        const BaseProximity::SPtr surfProx = findClosestProxOnSurf(shaftProx, l_surfGeom.get(), projectOnSurf, filter);
+        const BaseProximity::SPtr surfProx = findClosestProxOnSurf(shaftProx, l_surfGeom.get(), projectOnSurf, filter, maxDistance);
 
         if (surfProx) {
             surfProx->normalize();
@@ -200,7 +212,7 @@ InsertionAlgorithm::AlgorithmOutput InsertionAlgorithm::shaftCollisionPhase() {
 
                 //  Experimental - This enables projection anywhere on the edge
                 auto findClosestProxOnShaft = Operations::FindClosestProximity::Operation::get(l_shaftGeom);
-                shaftProx = findClosestProxOnShaft(surfProx, l_shaftGeom, projectOnShaft, filter);
+                shaftProx = findClosestProxOnShaft(surfProx, l_shaftGeom, projectOnShaft, filter, maxDistance);
 
                 if (!shaftProx) continue;
 
@@ -253,6 +265,7 @@ void InsertionAlgorithm::insertionPhase() {
     auto projectOnVol = Operations::Project::Operation::get(l_volGeom);
     auto containsPointInVol = Operations::ContainsPointInProximity::Operation::get(l_volGeom);
     const FilterFUNC filter = getFilterFunc();
+    const double maxDistance = getFilterMaxDistance();
 
     // Cache shaft segment properties to avoid repeated lookups and normalizations
     struct ShaftSegment {
@@ -316,7 +329,7 @@ void InsertionAlgorithm::insertionPhase() {
             if (!shaftProx) continue;
 
             // ... then find nearest volume proximity
-            const BaseProximity::SPtr volProx = findClosestProxOnVol(shaftProx, l_volGeom.get(), projectOnVol, filter);
+            const BaseProximity::SPtr volProx = findClosestProxOnVol(shaftProx, l_volGeom.get(), projectOnVol, filter, maxDistance);
 
             if (!volProx) continue;
 
@@ -342,9 +355,10 @@ InsertionAlgorithm::AlgorithmOutput InsertionAlgorithm::reprojectCouplingPoints(
     auto findClosestProxOnShaft = Operations::FindClosestProximity::Operation::get(l_shaftGeom);
     auto projectOnShaft = Operations::Project::Operation::get(l_shaftGeom);
     const FilterFUNC filter = getFilterFunc();
+    const double maxDistance = getFilterMaxDistance();
 
     for (const auto& cp : m_couplingPts) {
-        const BaseProximity::SPtr shaftProx = findClosestProxOnShaft(cp, l_shaftGeom.get(), projectOnShaft, filter);
+        const BaseProximity::SPtr shaftProx = findClosestProxOnShaft(cp, l_shaftGeom.get(), projectOnShaft, filter, maxDistance);
 
         if (!shaftProx) continue;
 

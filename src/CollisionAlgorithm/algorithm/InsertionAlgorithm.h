@@ -43,6 +43,10 @@ public:
     /// Handles puncture, shaft collisions and insertion into tissue phases.
     void doDetection() override;
 
+    /// Smallest `distance` of the DistanceFilters of this algorithm (max double if none): no proximity farther than that can
+    /// be accepted, so the closest-proximity searches use it to prune the broad phase.
+    double getFilterMaxDistance() const;
+
     virtual AlgorithmOutput puncturePhase();
     virtual AlgorithmOutput shaftCollisionPhase();
     virtual void insertionPhase();

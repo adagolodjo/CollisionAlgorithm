@@ -7,6 +7,7 @@ set(UNIT_TEST_SOURCES
     FirstAlgorithmTest.cpp
     AABBBroadPhaseTest.cpp
     Find2DClosestProximityTest.cpp
+    FindClosestProximityTest.cpp
     ProjectTest.cpp
     SubsetGeometryTest.cpp
 )
