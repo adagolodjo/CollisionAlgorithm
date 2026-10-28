@@ -6,18 +6,18 @@ g_needleBaseOffset=[0.04,0.04,0]
 g_needleRadius = 0.001 #(m)
 g_needleMechanicalParameters = {
     "radius":g_needleRadius,
-    "youngModulus":1e12,
+    "youngModulus":1e11,
     "poissonRatio":0.3
 }
 g_needleTotalMass=0.01
 
 g_gelRegularGridParameters = {
-    "n":[6, 6, 6],
+    "n":[8, 8, 8],
     "min":[-0.125, -0.125, -0.350],
     "max":[0.125, 0.125, -0.100]
 } #Again all in mm
 g_gelMechanicalParameters = {
-    "youngModulus":1e6,
+    "youngModulus":8e5,
     "poissonRatio":0.45,
     "method":"large"
 }
@@ -32,7 +32,7 @@ def createScene(root):
 
     root.addObject("RequiredPlugin",pluginName=['Sofa.Component.AnimationLoop',
                                                 'Sofa.Component.Constraint.Lagrangian.Solver',
-                                                'Sofa.Component.ODESolver.Backward',
+                                                'Sofa.Component.IntegrationScheme.Backward',
                                                 'Sofa.Component.Visual',
                                                 'Sofa.Component.Constraint.Lagrangian.Correction',
                                                 'Sofa.Component.Constraint.Lagrangian.Model',
@@ -60,26 +60,42 @@ def createScene(root):
     root.addObject("ConstraintAttachButtonSetting")
     root.addObject("VisualStyle", displayFlags="showVisualModels hideBehaviorModels showCollisionModels hideMappings hideForceFields showWireframe showInteractionForceFields" )
     root.addObject("FreeMotionAnimationLoop")
-    root.addObject("GenericConstraintSolver", tolerance=1e-5, maxIt=5000)
+    root.addObject("BlockGaussSeidelConstraintSolver", tolerance=0.00001, maxIt=5000, printLog=False, computeConstraintForces=True)
     root.addObject("CollisionLoop")
 
     needleBaseMaster = root.addChild("NeedleBaseMaster")
-    needleBaseMaster.addObject("MechanicalObject", name="mstate_baseMaster", template="Rigid3d", showObjectScale=0.002, showObject=False, drawMode=1
+    needleBaseMaster.addObject("MechanicalObject", name="mstate_baseMaster", template="Rigid3d", showObjectScale=0.002, showObject=True, drawMode=1
         , position="@reader.position")
     #    , position=[0.04, 0.04, 0, 0, 0, 0, 1])
-    #needleBaseMaster.addObject("LinearMovementProjectiveConstraint",indices=[0], keyTimes=[0,1.0,1.5],movements=
-    #    [ [0.04, 0.04,  0.05, 0, 3.14/2, 0]
-    #    , [0.04, 0.04, -0.04, 0, 3.14/2, 0]
-    #    , [0.05, 0.04, -0.04, 0, 3.14/2 + 3.14/16, 0]
-    #],relativeMovements=False)
-    #needleBaseMaster.addObject("WriteState", name="writer", filename="RecordState/NeedleInsertion.txt"
+    #needleBaseMaster.addObject("LinearMovementProjectiveConstraint",indices=[0], 
+    #    keyTimes=[
+    #        0, 0.04, 0.25, 0.3, 0.35, 0.55
+    #        ,0.6, 0.65, 0.85, 0.95, 1.05, 1.15
+    #    ],
+    #    movements=[
+    #        [0.04, 0.04,  0, 0, 0, 0],
+    #        [0.04, 0.04,  0.02, 0, 3.14/2, 0],
+    #        [0.04, 0.04, -0.07, 0, 3.14/2, 0],
+    #        [0.05, 0.04, -0.07, 0, 3.14/2 + 3.14/16, 0],
+    #        [0.04, 0.04, -0.07, 0, 3.14/2, 0],
+    #        [0.04, 0.04,  0.005,0, 3.14/2, 0],
+    #        # Change to insertion at an angle
+    #        [0.06, 0.04,  0.005, 0, 3.14/2, 0],
+    #        [0.06, 0.04,  0.005, 0, 3.14/2 + 3.14/8, 0],
+    #        [0.030866, 0.04, -0.04119, 0, 3.14/2 + 3.14/8, 0],
+    #        [0.030866, 0.04, -0.04119, 0, 3.14/2, 0],
+    #        [0.030866, 0.04, -0.04119, 0, 3.14/2 + 3.14/8, 0],
+    #        [0.06, 0.04, 0.005, 0, 3.14/2 + 3.14/8, 0]
+    #    ]
+    #    ,relativeMovements=False
+    #)
+    #needleBaseMaster.addObject("WriteState", name="writer", filename="RecordState/NeedleInsertionCycles.txt"
     #    , period=0.01, writeX=True, writeV=True, time=0)
-    needleBaseMaster.addObject("ReadState", name="reader", filename="RecordState/NeedleInsertion.txt")
-
+    needleBaseMaster.addObject("ReadState", name="reader", filename="RecordState/NeedleInsertionCycles.txt")
 
 
     needle = root.addChild("Needle")
-    needle.addObject("EulerImplicitSolver", firstOrder=True)
+    needle.addObject("EulerImplicitIntegrationScheme", firstOrder=True)
     needle.addObject("EigenSparseLU", name="LinearSolver", template="CompressedRowSparseMatrixd")
     needle.addObject("EdgeSetTopologyContainer", name="Container", position=[[i * g_needleLength/(g_needleNumberOfElems) + g_needleBaseOffset[0], g_needleBaseOffset[1],  g_needleBaseOffset[2]] for i in range(g_needleNumberOfElems + 1)]
                                                                  , edges=[[i, i+1] for i in range(g_needleNumberOfElems)])
@@ -87,7 +103,7 @@ def createScene(root):
     needle.addObject("EdgeSetTopologyModifier", name="modifier")
     needle.addObject("PointSetTopologyModifier", name="modifier2")
 
-    needle.addObject("MechanicalObject", name="mstate", template="Rigid3d", showObjectScale=0.0002, showObject=False, drawMode=1)
+    needle.addObject("MechanicalObject", name="mstate", template="Rigid3d", showObjectScale=0.0002, showObject=True, drawMode=1)
 
     needle.addObject("UniformMass", totalMass=g_needleTotalMass)
     needle.addObject("BeamFEMForceField", name="FEM", **g_needleMechanicalParameters)
@@ -140,7 +156,7 @@ def createScene(root):
 
 
     volume = root.addChild("Volume")
-    volume.addObject("EulerImplicitSolver")
+    volume.addObject("EulerImplicitIntegrationScheme", impulseBased=True)
     volume.addObject("EigenSimplicialLDLT", name="LinearSolver", template='CompressedRowSparseMatrixMat3x3d')
     volume.addObject("TetrahedronSetTopologyContainer", name="TetraContainer", position="@../GelGridTopo/HexaTop.position")
     volume.addObject("TetrahedronSetTopologyModifier", name="TetraModifier")
@@ -148,6 +164,7 @@ def createScene(root):
 
     volume.addObject("MechanicalObject", name="mstate_gel", template="Vec3d")
     volume.addObject("TetrahedronGeometry", name="geom_tetra", mstate="@mstate_gel", topology="@TetraContainer", draw=False)
+    volume.addObject("PhongTriangleNormalHandler", name="InternalTriangles", geometry="@geom_tetra")
     volume.addObject("FastTetrahedralCorotationalForceField", name="FF",**g_gelMechanicalParameters)
     volume.addObject("MeshMatrixMass", name="Mass",totalMass=g_gelTotalMass)
 
@@ -187,14 +204,14 @@ def createScene(root):
         surfGeom="@Volume/collision/geom_tri", 
         shaftGeom="@Needle/bodyCollision/geom_body", 
         volGeom="@Volume/geom_tetra", 
-        punctureForceThreshold=16, 
+        punctureForceThreshold=200, 
         tipDistThreshold=0.003,
         drawcollision=True,
         drawPointsScale=0.0001
     )
     root.addObject("DistanceFilter",algo="@InsertionAlgo",distance=0.01)
     root.addObject("SecondDirection",name="punctureDirection",handler="@Volume/collision/SurfaceTriangles")
-    root.addObject("ConstraintUnilateral",input="@InsertionAlgo.collisionOutput",directions="@punctureDirection",draw_scale=0.001)
+    root.addObject("ConstraintUnilateral",input="@InsertionAlgo.collisionOutput",directions="@punctureDirection", contactDistance=0,draw_scale=0.001, mu=0.001)
 
     root.addObject("FirstDirection",name="bindDirection", handler="@Needle/bodyCollision/NeedleBeams")
-    root.addObject("ConstraintInsertion",input="@InsertionAlgo.insertionOutput", directions="@bindDirection",draw_scale=0.002, frictionCoeff=0.002)
+    root.addObject("ConstraintInsertion",input="@InsertionAlgo.insertionOutput", directions="@bindDirection",draw_scale=0.002, frictionCoeff=0.00)#23)

@@ -2,13 +2,11 @@
 #include <CollisionAlgorithm/geometry/TriangleGeometry.h>
 #include <sofa/core/ObjectFactory.h>
 
-namespace sofa::collisionalgorithm
-{
+namespace sofa::collisionalgorithm {
 
 template class SOFA_COLLISIONALGORITHM_API TriangleGeometry<sofa::defaulttype::Vec3dTypes>;
 
-void registerTriangleGeometry(sofa::core::ObjectFactory* factory)
-{
+void registerTriangleGeometry(sofa::core::ObjectFactory* factory) {
     factory->registerObjects(
         sofa::core::ObjectRegistrationData("A class bridging triangle topological information with "
                                            "the proximity detection algorithm")

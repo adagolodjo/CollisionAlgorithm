@@ -1,18 +1,20 @@
 #include <CollisionAlgorithm/operations/CreateCenterProximity.h>
-#include <CollisionAlgorithm/toolbox/PointToolBox.h>
 #include <CollisionAlgorithm/toolbox/EdgeToolBox.h>
-#include <CollisionAlgorithm/toolbox/TriangleToolBox.h>
+#include <CollisionAlgorithm/toolbox/PointToolBox.h>
 #include <CollisionAlgorithm/toolbox/TetrahedronToolBox.h>
+#include <CollisionAlgorithm/toolbox/TriangleToolBox.h>
 
 namespace sofa::collisionalgorithm::Operations::CreateCenterProximity {
 
-int register_CenterProximity_Point = Operation::register_func<PointElement>(&toolbox::PointToolBox::createCenterProximity);
+int register_CenterProximity_Point =
+    Operation::register_func<PointElement>(&toolbox::PointToolBox::createCenterProximity);
 
 int register_CenterProximity_Edge = Operation::register_func<EdgeElement>(&toolbox::EdgeToolBox::createCenterProximity);
 
-int register_CenterProximity_Triangle = Operation::register_func<TriangleElement>(&toolbox::TriangleToolBox::createCenterProximity);
+int register_CenterProximity_Triangle =
+    Operation::register_func<TriangleElement>(&toolbox::TriangleToolBox::createCenterProximity);
 
-int register_CenterProximity_Tetrahedron = Operation::register_func<TetrahedronElement>(&toolbox::TetrahedronToolBox::createCenterProximity);
+int register_CenterProximity_Tetrahedron =
+    Operation::register_func<TetrahedronElement>(&toolbox::TetrahedronToolBox::createCenterProximity);
 
-}
-
+}  // namespace sofa::collisionalgorithm::Operations::CreateCenterProximity

@@ -1,10 +1,8 @@
 #include <CollisionAlgorithm/broadphase/AABBBroadPhase.h>
 #include <sofa/core/ObjectFactory.h>
 
-namespace sofa::collisionalgorithm
-{
-void registerAABBBroadPhase(sofa::core::ObjectFactory* factory)
-{
+namespace sofa::collisionalgorithm {
+void registerAABBBroadPhase(sofa::core::ObjectFactory* factory) {
     factory->registerObjects(sofa::core::ObjectRegistrationData(R"(
             **AABBBroadPhase** is a real-time collision detection component that uses the 
             Axis-Aligned Bounding Box (AABB) approach for broad-phase collision handling.

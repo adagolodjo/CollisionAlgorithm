@@ -1,8 +1,9 @@
 #pragma once
 
-#include <CollisionAlgorithm/config.h>
 #include <CollisionAlgorithm/BaseProximity.h>
+#include <CollisionAlgorithm/config.h>
 #include <sofa/core/visual/VisualParams.h>
+#include <sofa/type/BoundingBox.h>
 
 namespace sofa::collisionalgorithm {
 
@@ -11,7 +12,7 @@ class EdgeElement;
 class TriangleElement;
 class TetrahedronElement;
 
-template<class ELMT>
+template <class ELMT>
 class ElementContainer {
 public:
     typedef typename std::shared_ptr<ELMT> SPtr;
@@ -19,25 +20,37 @@ public:
     typedef typename std::vector<SPtr>::const_iterator const_iterator;
 
     void insert(SPtr e) {
-        for (unsigned i=0;i<m_data.size();i++)
+        for (unsigned i = 0; i < m_data.size(); i++)
             if (e == m_data[i]) return;
 
         m_data.push_back(e);
     }
 
-    inline SPtr & operator[](unsigned i) { return m_data[i]; }
+    inline SPtr& operator[](unsigned i) {
+        return m_data[i];
+    }
 
-    inline const SPtr & operator[](unsigned i) const { return m_data[i]; }
+    inline const SPtr& operator[](unsigned i) const {
+        return m_data[i];
+    }
 
-    inline void clear() { m_data.clear(); }
+    inline void clear() {
+        m_data.clear();
+    }
 
-    inline unsigned size() const { return m_data.size(); }
+    inline unsigned size() const {
+        return m_data.size();
+    }
 
-    inline const_iterator cbegin() const { return m_data.cbegin(); }
+    inline const_iterator cbegin() const {
+        return m_data.cbegin();
+    }
 
-    inline const_iterator cend() const { return m_data.cend(); }
+    inline const_iterator cend() const {
+        return m_data.cend();
+    }
 
-    static inline const ElementContainer & empty() {
+    static inline const ElementContainer& empty() {
         static ElementContainer s_empty;
         return s_empty;
     }
@@ -48,18 +61,28 @@ private:
 
 class SOFA_COLLISIONALGORITHM_API BaseElement {
 public:
-
     typedef std::shared_ptr<BaseElement> SPtr;
 
-    virtual const ElementContainer<PointElement> & pointElements() const = 0;//{ return m_pointElements; }
+    virtual const ElementContainer<PointElement>& pointElements() const = 0;  //{ return m_pointElements; }
 
-    virtual const ElementContainer<EdgeElement> & edgeElements() const = 0;//{ return m_edgeElements; }
+    virtual const ElementContainer<EdgeElement>& edgeElements() const = 0;  //{ return m_edgeElements; }
 
-    virtual const ElementContainer<TriangleElement> & triangleElements() const = 0;//{ return m_triangleElements; }
+    virtual const ElementContainer<TriangleElement>& triangleElements() const = 0;  //{ return m_triangleElements; }
 
-    virtual const ElementContainer<TetrahedronElement> & tetrahedronElements() const = 0;//{ return m_tetrahedronElements; }
+    virtual const ElementContainer<TetrahedronElement>& tetrahedronElements()
+        const = 0;  //{ return m_tetrahedronElements; }
 
-    virtual void draw(const core::visual::VisualParams * vparams) = 0;
+    /**
+     * @brief Computes the bounding box of the element.
+     *
+     * The default implementation is based on the element's vertices, which are
+     * exposed through pointElements() for edges, triangles and tetrahedra.
+     * Element types that do not expose their vertices this way (e.g. PointElement)
+     * have to override it.
+     */
+    virtual type::BoundingBox getBoundingBox() const;
+
+    virtual void draw(const core::visual::VisualParams* vparams) = 0;
 
     virtual const std::type_info& getTypeInfo() const = 0;
 
@@ -67,14 +90,16 @@ public:
 
     virtual void update() = 0;
 
-    void setDirty(bool b) {m_isDirty = b;}
+    void setDirty(bool b) {
+        m_isDirty = b;
+    }
 
-    bool isDirty() {return m_isDirty;}
+    bool isDirty() const {
+        return m_isDirty;
+    }
 
 protected:
-    bool m_isDirty;
-
+    bool m_isDirty = true;
 };
 
-
-}
+}  // namespace sofa::collisionalgorithm

@@ -1,8 +1,8 @@
 #include <CollisionAlgorithm/operations/Project.h>
-#include <CollisionAlgorithm/toolbox/PointToolBox.h>
 #include <CollisionAlgorithm/toolbox/EdgeToolBox.h>
-#include <CollisionAlgorithm/toolbox/TriangleToolBox.h>
+#include <CollisionAlgorithm/toolbox/PointToolBox.h>
 #include <CollisionAlgorithm/toolbox/TetrahedronToolBox.h>
+#include <CollisionAlgorithm/toolbox/TriangleToolBox.h>
 
 namespace sofa::collisionalgorithm::Operations::Project {
 
@@ -14,5 +14,4 @@ int register_Project_Triangle = Operation::register_func<TriangleElement>(&toolb
 
 int register_Project_Tetrahedron = Operation::register_func<TetrahedronElement>(&toolbox::TetrahedronToolBox::project);
 
-}
-
+}  // namespace sofa::collisionalgorithm::Operations::Project

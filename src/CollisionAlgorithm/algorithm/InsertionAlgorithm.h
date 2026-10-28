@@ -12,12 +12,10 @@
 #include <sofa/component/constraint/lagrangian/solver/ConstraintSolverImpl.h>
 #include <sofa/component/statecontainer/MechanicalObject.h>
 
-namespace sofa::collisionalgorithm
-{
+namespace sofa::collisionalgorithm {
 
-class SOFA_COLLISIONALGORITHM_API InsertionAlgorithm : public BaseAlgorithm
-{
-   public:
+class SOFA_COLLISIONALGORITHM_API InsertionAlgorithm : public BaseAlgorithm {
+public:
     SOFA_CLASS(InsertionAlgorithm, BaseAlgorithm);
 
     typedef core::behavior::MechanicalState<defaulttype::Vec3Types> MechStateTipType;
@@ -44,6 +42,10 @@ class SOFA_COLLISIONALGORITHM_API InsertionAlgorithm : public BaseAlgorithm
     /// Detection outputs are used to create collisions and needle-tissue coupling.
     /// Handles puncture, shaft collisions and insertion into tissue phases.
     void doDetection() override;
+
+    /// Smallest `distance` of the DistanceFilters of this algorithm (max double if none): no proximity farther than that can
+    /// be accepted, so the closest-proximity searches use it to prune the broad phase.
+    double getFilterMaxDistance() const;
 
     virtual AlgorithmOutput puncturePhase();
     virtual AlgorithmOutput shaftCollisionPhase();

@@ -2,8 +2,7 @@
 #include <CollisionAlgorithm/proximity/TetrahedronProximity.h>
 #include <CollisionAlgorithm/proximity/TriangleProximity.h>
 
-namespace sofa::collisionalgorithm::Operations::ContainsPointInElement
-{
+namespace sofa::collisionalgorithm::Operations::ContainsPointInElement {
 
 int register_ContainsPoint_Triangle =
     Operation::register_func<TriangleElement>(&toolbox::TriangleToolBox::containsPoint);
@@ -13,8 +12,7 @@ int register_ContainsPoint_Tetrahedron =
 
 }  // namespace sofa::collisionalgorithm::Operations::ContainsPointInElement
 
-namespace sofa::collisionalgorithm::Operations::ContainsPointInProximity
-{
+namespace sofa::collisionalgorithm::Operations::ContainsPointInProximity {
 
 int register_ContainsPointInProximity_Triangle =
     Operation::register_func<TriangleElement>(&containsPoint<TriangleProximity>);
