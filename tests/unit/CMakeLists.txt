@@ -6,6 +6,7 @@ sofa_find_package(Sofa.Component.StateContainer REQUIRED)
 set(UNIT_TEST_SOURCES
     FirstAlgorithmTest.cpp
     AABBBroadPhaseTest.cpp
+    ClosestProximityAlgorithmTest.cpp
     Find2DClosestProximityTest.cpp
     FindClosestProximityTest.cpp
     ProjectTest.cpp

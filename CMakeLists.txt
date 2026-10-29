@@ -26,6 +26,7 @@ set(HEADER_FILES
     "${COLLISIONALGORITHM_SRC}/InternalData.h"
     "${COLLISIONALGORITHM_SRC}/initCollisionAlgorithm.h"
 
+    "${COLLISIONALGORITHM_SRC}/algorithm/ClosestProximityAlgorithm.h"
     "${COLLISIONALGORITHM_SRC}/algorithm/Find2DClosestProximityAlgorithm.h"
     "${COLLISIONALGORITHM_SRC}/algorithm/InsertionAlgorithm.h"
 
@@ -70,6 +71,7 @@ set(SOURCE_FILES
     "${COLLISIONALGORITHM_SRC}/CollisionPipeline.cpp"
     "${COLLISIONALGORITHM_SRC}/initCollisionAlgorithm.cpp"
 
+    "${COLLISIONALGORITHM_SRC}/algorithm/ClosestProximityAlgorithm.cpp"
     "${COLLISIONALGORITHM_SRC}/algorithm/Find2DClosestProximityAlgorithm.cpp"
     "${COLLISIONALGORITHM_SRC}/algorithm/InsertionAlgorithm.cpp"
 

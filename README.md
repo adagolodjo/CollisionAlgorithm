@@ -114,6 +114,24 @@ This step is more detailed, so refer to the examples in `examples/NeedleInsertio
 </Node>
 ```
 
+## Contact of a rod (or any thin object) with a surface
+
+`InsertionAlgorithm` is written for a needle.  To detect the contact of a rod, a wire or a catheter with a triangle surface use
+`ClosestProximityAlgorithm`, which has no puncture/insertion phase:
+
+```python
+root.addObject("CollisionLoop")
+root.addObject("ClosestProximityAlgorithm", name="detection", dest="@Surface/geometry", distance=reach,
+               **{"from": "@Rod/geometry"})        # EdgeGeometry of the rod, TriangleGeometry (+ static AABBBroadPhase) of the surface
+root.addObject("SecondDirection", name="direction", handler="@Surface/normals")
+root.addObject("ConstraintUnilateral", input="@detection.collisionOutput", directions="@direction",
+               mu=0.1, frictionCone=True, contactDistance=rod_radius)
+```
+For each edge it outputs one pair, at the point of the edge closest to the surface (`projective`, default; `samples` gives
+equally spaced points per edge instead).  `distance` is the farthest accepted pair and prunes the broad phase.  The geometries need a
+`MechanicalObject` in `Vec3d`: put it in a child node of the rod and map it (`IdentityMapping` from rigid frames).  See
+`examples/RodOnSurface.py`.
+
 ## Acknowledgments
 This project builds upon the original repository from 
 [ICube Laboratory, University of Strasbourg](https://icube.unistra.fr/en/) 

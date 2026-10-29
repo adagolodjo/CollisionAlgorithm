@@ -19,6 +19,7 @@ extern void registerCollisionLoop(sofa::core::ObjectFactory* factory);
 // Algorithms
 extern void registerFind2DClosestProximityAlgorithm(sofa::core::ObjectFactory* factory);
 extern void registerInsertionAlgorithm(sofa::core::ObjectFactory* factory);
+extern void registerClosestProximityAlgorithm(sofa::core::ObjectFactory* factory);
 
 // BroadPhase
 extern void registerAABBBroadPhase(sofa::core::ObjectFactory* factory);
@@ -87,6 +88,7 @@ void registerObjects(sofa::core::ObjectFactory* factory) {
     // Register Algorithms
     registerFind2DClosestProximityAlgorithm(factory);
     registerInsertionAlgorithm(factory);
+    registerClosestProximityAlgorithm(factory);
     // Register BroadPhase
     registerAABBBroadPhase(factory);
     registerFullAABBBroadPhase(factory);
